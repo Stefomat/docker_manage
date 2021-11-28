@@ -2,7 +2,7 @@
 
 # Autor:      aptalca <https://blog.linuxserver.io/2019/10/01/updating-and-backing-up-docker-containers-with-version-control/>
 # Autor:      ***REMOVED*** <***REMOVED***>
-# Geändert:   Dezember 2020
+# Geändert:   August 2021
 
 # Change variables here:
 APPDATA_LOC="/opt/appdata"
@@ -30,12 +30,15 @@ function backup {
         rm "${VERSIONS_LOC}.bak"
     fi
 
+    read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
     docker-compose -f "$COMPOSE_LOC" down
 
+    read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
     APPDATA_NAME=$(echo "$APPDATA_LOC" | awk -F/ '{print $NF}')
     cp -a "$COMPOSE_LOC" "$APPDATA_LOC"/docker-compose.yml.bak
     tar -C "$APPDATA_LOC"/.. -cvzf "$APPDATA_LOC"/../appdatabackup.tar.gz "$APPDATA_NAME"
 
+    read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
     docker-compose -f "$COMPOSE_LOC" up -d
     chown "${USER}":"${USER}" "$APPDATA_LOC"/../appdatabackup.tar.gz
 }
@@ -59,21 +62,29 @@ function update {
         rm "${VERSIONS_LOC}.bak"
     fi
 
+    read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
     sudo docker-compose -f "$COMPOSE_LOC" pull
+
+    read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
     docker-compose -f "$COMPOSE_LOC" down
 
+    read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
     APPDATA_NAME=$(echo "$APPDATA_LOC" | awk -F/ '{print $NF}')
     cp -a "$COMPOSE_LOC" "$APPDATA_LOC"/docker-compose.yml.bak
     tar -C "$APPDATA_LOC"/.. -cvzf "$APPDATA_LOC"/../appdatabackup.tar.gz "$APPDATA_NAME"
 
+    read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
     docker-compose -f "$COMPOSE_LOC" up -d
     chown "${USER}":"${USER}" "$APPDATA_LOC"/../appdatabackup.tar.gz
 
+    read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
     docker image prune -f
 }
 
 function restore {
     sudo docker-compose -f "$COMPOSE_LOC" down
+
+    read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
     randstr=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-8};echo;)
     mv "$APPDATA_LOC" "${APPDATA_LOC}.$randstr"
     cp -a "$COMPOSE_LOC" "${COMPOSE_LOC}.$randstr"
@@ -84,7 +95,11 @@ function restore {
         repo_digest=$(echo "$i" | awk -F, '{print $3}')
         sed -i "s#image: ${image_name}#image: ${repo_digest}#g" "$COMPOSE_LOC"
     done
+
+    read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
     docker-compose -f "$COMPOSE_LOC" pull
+
+    read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
     docker-compose -f "$COMPOSE_LOC" up -d
 }
 
@@ -94,7 +109,11 @@ function resume {
         repo_digest="$(echo $i | awk -F, '{print $3}')"
         sed -i "s#image: ${repo_digest}#image: ${image_name}#g" "$COMPOSE_LOC"
     done
+
+    read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
     docker-compose -f "$COMPOSE_LOC" pull
+
+    read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
     docker-compose -f "$COMPOSE_LOC" up -d
 }
 
