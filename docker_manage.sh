@@ -11,6 +11,35 @@ COMPOSE_LOC="/root/docker-compose.yml"
 # Don't change variables below unless you want to customize the script
 VERSIONS_LOC="${APPDATA_LOC}/versions.txt"
 
+function backup {
+    if [ ! -f "$VERSIONS_LOC" ];then
+        for i in $(docker-compose -f "$COMPOSE_LOC" config --services); do
+            container_name=$(docker run --rm -v "$(dirname $COMPOSE_LOC)":/workdir mikefarah/yq:3 yq r "$(awk -F/ '{print $NF}' <<< $COMPOSE_LOC)" services."${i}".container_name)
+            image_name=$(docker inspect --format='{{ index .Config.Image }}' "$container_name")
+            repo_digest=$(docker inspect --format='{{ index .RepoDigests 0 }}' $(docker inspect --format='{{ .Image }}' "$container_name"))
+            echo "$container_name,$image_name,$repo_digest" >> "$VERSIONS_LOC"
+        done
+    else
+        mv "$VERSIONS_LOC" "${VERSIONS_LOC}.bak"
+        for i in $(cat "${VERSIONS_LOC}.bak"); do
+            container_name=$(echo "$i" | awk -F, '{print $1}')
+            image_name=$(echo "$i" | awk -F, '{print $2}')
+            repo_digest=$(docker inspect --format='{{ index .RepoDigests 0 }}' $(docker inspect --format='{{ .Image }}' "$container_name"))
+            echo "$container_name,$image_name,$repo_digest" >> "$VERSIONS_LOC"
+        done
+        rm "${VERSIONS_LOC}.bak"
+    fi
+
+    docker-compose -f "$COMPOSE_LOC" down
+
+    APPDATA_NAME=$(echo "$APPDATA_LOC" | awk -F/ '{print $NF}')
+    cp -a "$COMPOSE_LOC" "$APPDATA_LOC"/docker-compose.yml.bak
+    tar -C "$APPDATA_LOC"/.. -cvzf "$APPDATA_LOC"/../appdatabackup.tar.gz "$APPDATA_NAME"
+
+    docker-compose -f "$COMPOSE_LOC" up -d
+    chown "${USER}":"${USER}" "$APPDATA_LOC"/../appdatabackup.tar.gz
+}
+
 function update {
     if [ ! -f "$VERSIONS_LOC" ];then
         for i in $(docker-compose -f "$COMPOSE_LOC" config --services); do
@@ -73,6 +102,6 @@ function resume {
 if declare -f "$1" > /dev/null; then
   "$@"
 else
-  echo "The only valid arguments are update, restore, and resume"
+  echo "The only valid arguments are backup, update, restore, and resume"
   exit 1
 fi
