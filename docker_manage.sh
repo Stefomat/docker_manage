@@ -21,12 +21,12 @@ function backup {
         done
     else
         mv "$VERSIONS_LOC" "${VERSIONS_LOC}.bak"
-        for i in $(cat "${VERSIONS_LOC}.bak"); do
-            container_name=$(echo "$i" | awk -F, '{print $1}')
-            image_name=$(echo "$i" | awk -F, '{print $2}')
+        while IFS= read -r line; do
+            container_name=$(echo "$line" | awk -F, '{print $1}')
+            image_name=$(echo "$line" | awk -F, '{print $2}')
             repo_digest=$(docker inspect --format='{{ index .RepoDigests 0 }}' "$(docker inspect --format='{{ .Image }}' "$container_name")")
             echo "$container_name,$image_name,$repo_digest" >> "$VERSIONS_LOC"
-        done
+        done < <(cat "${VERSIONS_LOC}.bak")
         rm "${VERSIONS_LOC}.bak"
     fi
 
@@ -53,12 +53,12 @@ function update {
         done
     else
         mv "$VERSIONS_LOC" "${VERSIONS_LOC}.bak"
-        for i in $(cat "${VERSIONS_LOC}.bak"); do
-            container_name=$(echo "$i" | awk -F, '{print $1}')
-            image_name=$(echo "$i" | awk -F, '{print $2}')
+        while IFS= read -r line; do
+            container_name=$(echo "$line" | awk -F, '{print $1}')
+            image_name=$(echo "$line" | awk -F, '{print $2}')
             repo_digest=$(docker inspect --format='{{ index .RepoDigests 0 }}' "$(docker inspect --format='{{ .Image }}' "$container_name")")
             echo "$container_name,$image_name,$repo_digest" >> "$VERSIONS_LOC"
-        done
+        done < <(cat "${VERSIONS_LOC}.bak")
         rm "${VERSIONS_LOC}.bak"
     fi
 
@@ -90,11 +90,11 @@ function restore {
     cp -a "$COMPOSE_LOC" "${COMPOSE_LOC}.$randstr"
     mkdir -p "$APPDATA_LOC"
     sudo tar xvf "$APPDATA_LOC"/../appdatabackup.tar.gz -C "$APPDATA_LOC"/../
-    for i in $(cat "$VERSIONS_LOC"); do
-        image_name=$(echo "$i" | awk -F, '{print $2}')
-        repo_digest=$(echo "$i" | awk -F, '{print $3}')
+    while IFS= read -r line; do
+        image_name=$(echo "$line" | awk -F, '{print $2}')
+        repo_digest=$(echo "$line" | awk -F, '{print $3}')
         sed -i "s#image: ${image_name}#image: ${repo_digest}#g" "$COMPOSE_LOC"
-    done
+    done < <(cat "$VERSIONS_LOC")
 
     read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
     docker-compose -f "$COMPOSE_LOC" pull
@@ -104,11 +104,11 @@ function restore {
 }
 
 function resume {
-    for i in $(cat "$VERSIONS_LOC"); do
-        image_name="$(echo "$i" | awk -F, '{print $2}')"
-        repo_digest="$(echo "$i" | awk -F, '{print $3}')"
+    while IFS= read -r line; do
+        image_name="$(echo "$line" | awk -F, '{print $2}')"
+        repo_digest="$(echo "$line" | awk -F, '{print $3}')"
         sed -i "s#image: ${repo_digest}#image: ${image_name}#g" "$COMPOSE_LOC"
-    done
+    done < <(cat "$VERSIONS_LOC")
 
     read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
     docker-compose -f "$COMPOSE_LOC" pull
