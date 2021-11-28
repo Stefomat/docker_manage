@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 # Change variables here:
 APPDATA_LOC="/home/user/docker"
