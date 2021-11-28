@@ -1,5 +1,9 @@
 #!/usr/bin/bash
 
+# Autor:      aptalca <https://blog.linuxserver.io/2019/10/01/updating-and-backing-up-docker-containers-with-version-control/>
+# Autor:      ***REMOVED*** <***REMOVED***>
+# Geändert:   Dezember 2020
+
 # Change variables here:
 APPDATA_LOC="/home/user/docker"
 COMPOSE_LOC="/home/user/docker-compose.yml"
