@@ -36,7 +36,7 @@ function backup {
     read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
     APPDATA_NAME=$(echo "$APPDATA_LOC" | awk -F/ '{print $NF}')
     cp -a "$COMPOSE_LOC" "$APPDATA_LOC"/docker-compose.yml.bak
-    tar -C "$APPDATA_LOC"/.. -cvzf "$APPDATA_LOC"/../appdatabackup.tar.gz "$APPDATA_NAME"
+    tar -C "$APPDATA_LOC"/.. -czf "$APPDATA_LOC"/../appdatabackup.tar.gz "$APPDATA_NAME"
 
     read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
     docker-compose -f "$COMPOSE_LOC" up -d
@@ -71,7 +71,7 @@ function update {
     read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
     APPDATA_NAME=$(echo "$APPDATA_LOC" | awk -F/ '{print $NF}')
     cp -a "$COMPOSE_LOC" "$APPDATA_LOC"/docker-compose.yml.bak
-    tar -C "$APPDATA_LOC"/.. -cvzf "$APPDATA_LOC"/../appdatabackup.tar.gz "$APPDATA_NAME"
+    tar -C "$APPDATA_LOC"/.. -czf "$APPDATA_LOC"/../appdatabackup.tar.gz "$APPDATA_NAME"
 
     read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
     docker-compose -f "$COMPOSE_LOC" up -d
@@ -89,7 +89,7 @@ function restore {
     mv "$APPDATA_LOC" "${APPDATA_LOC}.$randstr"
     cp -a "$COMPOSE_LOC" "${COMPOSE_LOC}.$randstr"
     mkdir -p "$APPDATA_LOC"
-    tar xvf "$APPDATA_LOC"/../appdatabackup.tar.gz -C "$APPDATA_LOC"/../
+    tar -xf "$APPDATA_LOC"/../appdatabackup.tar.gz -C "$APPDATA_LOC"/../
     while IFS= read -r line; do
         image_name=$(echo "$line" | awk -F, '{print $2}')
         repo_digest=$(echo "$line" | awk -F, '{print $3}')
