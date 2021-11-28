@@ -35,10 +35,10 @@ function update {
 
     APPDATA_NAME=$(echo "$APPDATA_LOC" | awk -F/ '{print $NF}')
     cp -a "$COMPOSE_LOC" "$APPDATA_LOC"/docker-compose.yml.bak
-    sudo tar -C "$APPDATA_LOC"/.. -cvzf "$APPDATA_LOC"/../appdatabackup.tar.gz "$APPDATA_NAME"
+    tar -C "$APPDATA_LOC"/.. -cvzf "$APPDATA_LOC"/../appdatabackup.tar.gz "$APPDATA_NAME"
 
     docker-compose -f "$COMPOSE_LOC" up -d
-    sudo chown "${USER}":"${USER}" "$APPDATA_LOC"/../appdatabackup.tar.gz
+    chown "${USER}":"${USER}" "$APPDATA_LOC"/../appdatabackup.tar.gz
 
     docker image prune -f
 }
