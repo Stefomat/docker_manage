@@ -16,7 +16,7 @@ function backup {
         for i in $(docker-compose -f "$COMPOSE_LOC" config --services); do
             container_name=$(docker run --rm -v "$(dirname $COMPOSE_LOC)":/workdir mikefarah/yq:3 yq r "$(awk -F/ '{print $NF}' <<< $COMPOSE_LOC)" services."${i}".container_name)
             image_name=$(docker inspect --format='{{ index .Config.Image }}' "$container_name")
-            repo_digest=$(docker inspect --format='{{ index .RepoDigests 0 }}' $(docker inspect --format='{{ .Image }}' "$container_name"))
+            repo_digest=$(docker inspect --format='{{ index .RepoDigests 0 }}' "$(docker inspect --format='{{ .Image }}' "$container_name")")
             echo "$container_name,$image_name,$repo_digest" >> "$VERSIONS_LOC"
         done
     else
@@ -24,7 +24,7 @@ function backup {
         for i in $(cat "${VERSIONS_LOC}.bak"); do
             container_name=$(echo "$i" | awk -F, '{print $1}')
             image_name=$(echo "$i" | awk -F, '{print $2}')
-            repo_digest=$(docker inspect --format='{{ index .RepoDigests 0 }}' $(docker inspect --format='{{ .Image }}' "$container_name"))
+            repo_digest=$(docker inspect --format='{{ index .RepoDigests 0 }}' "$(docker inspect --format='{{ .Image }}' "$container_name")")
             echo "$container_name,$image_name,$repo_digest" >> "$VERSIONS_LOC"
         done
         rm "${VERSIONS_LOC}.bak"
@@ -48,7 +48,7 @@ function update {
         for i in $(docker-compose -f "$COMPOSE_LOC" config --services); do
             container_name=$(docker run --rm -v "$(dirname $COMPOSE_LOC)":/workdir mikefarah/yq:3 yq r "$(awk -F/ '{print $NF}' <<< $COMPOSE_LOC)" services."${i}".container_name)
             image_name=$(docker inspect --format='{{ index .Config.Image }}' "$container_name")
-            repo_digest=$(docker inspect --format='{{ index .RepoDigests 0 }}' $(docker inspect --format='{{ .Image }}' "$container_name"))
+            repo_digest=$(docker inspect --format='{{ index .RepoDigests 0 }}' "$(docker inspect --format='{{ .Image }}' "$container_name")")
             echo "$container_name,$image_name,$repo_digest" >> "$VERSIONS_LOC"
         done
     else
@@ -56,7 +56,7 @@ function update {
         for i in $(cat "${VERSIONS_LOC}.bak"); do
             container_name=$(echo "$i" | awk -F, '{print $1}')
             image_name=$(echo "$i" | awk -F, '{print $2}')
-            repo_digest=$(docker inspect --format='{{ index .RepoDigests 0 }}' $(docker inspect --format='{{ .Image }}' "$container_name"))
+            repo_digest=$(docker inspect --format='{{ index .RepoDigests 0 }}' "$(docker inspect --format='{{ .Image }}' "$container_name")")
             echo "$container_name,$image_name,$repo_digest" >> "$VERSIONS_LOC"
         done
         rm "${VERSIONS_LOC}.bak"
@@ -85,7 +85,7 @@ function restore {
     sudo docker-compose -f "$COMPOSE_LOC" down
 
     read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
-    randstr=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-8};echo;)
+    randstr=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c"${1:-8}";echo;)
     mv "$APPDATA_LOC" "${APPDATA_LOC}.$randstr"
     cp -a "$COMPOSE_LOC" "${COMPOSE_LOC}.$randstr"
     mkdir -p "$APPDATA_LOC"
@@ -105,8 +105,8 @@ function restore {
 
 function resume {
     for i in $(cat "$VERSIONS_LOC"); do
-        image_name="$(echo $i | awk -F, '{print $2}')"
-        repo_digest="$(echo $i | awk -F, '{print $3}')"
+        image_name="$(echo "$i" | awk -F, '{print $2}')"
+        repo_digest="$(echo "$i" | awk -F, '{print $3}')"
         sed -i "s#image: ${repo_digest}#image: ${image_name}#g" "$COMPOSE_LOC"
     done
 
