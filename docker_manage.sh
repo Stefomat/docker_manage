@@ -12,16 +12,9 @@ COMPOSE_LOC="/root/docker-compose.yml"
 VERSIONS_LOC="${APPDATA_LOC}/versions.txt"
 
 function update {
-    echo "Searching for yq"
-    if which yq; then
-        echo "yq found, continuing"
-    else
-        echo "Please install yq first"
-        exit 1
-    fi
     if [ ! -f "$VERSIONS_LOC" ];then
         for i in $(docker-compose -f "$COMPOSE_LOC" config --services); do
-            container_name=$(yq r "$COMPOSE_LOC" services."${i}".container_name)
+            container_name=$(docker run --rm -v "$(dirname $COMPOSE_LOC)":/workdir mikefarah/yq:3 yq r "$(awk -F/ '{print $NF}' <<< $COMPOSE_LOC)" services."${i}".container_name)
             image_name=$(docker inspect --format='{{ index .Config.Image }}' "$container_name")
             repo_digest=$(docker inspect --format='{{ index .RepoDigests 0 }}' $(docker inspect --format='{{ .Image }}' "$container_name"))
             echo "$container_name,$image_name,$repo_digest" >> "$VERSIONS_LOC"
@@ -36,19 +29,6 @@ function update {
         done
         rm "${VERSIONS_LOC}.bak"
     fi
-
-    # Alternative method that doesn't require yq. Comment out lines 11-34 if you're enabling this method.
-    #CONTAINERS=( \
-    #    letsencrypt,linuxserver/letsencrypt \
-    #    mariadb,linuxserver/mariadb \
-    #    phpmyadmin,phpmyadmin/phpmyadmin \
-    #    )
-    #for i in "${CONTAINERS[@]}"; do
-    #    container_name=$(echo "$i" | awk -F, '{print $1}')
-    #    image_name=$(echo "$i" | awk -F, '{print $2}')
-    #    repo_digest=$(docker inspect --format='{{ index .RepoDigests 0 }}' $(docker inspect --format='{{ .Image }}' "$container_name"))
-    #    echo "$container_name,$image_name,$repo_digest" >> "$VERSIONS_LOC"
-    #done
 
     sudo docker-compose -f "$COMPOSE_LOC" pull
     docker-compose -f "$COMPOSE_LOC" down
