@@ -5,8 +5,8 @@
 # Geändert:   Dezember 2020
 
 # Change variables here:
-APPDATA_LOC="/home/user/docker"
-COMPOSE_LOC="/home/user/docker-compose.yml"
+APPDATA_LOC="/opt/appdata"
+COMPOSE_LOC="/root/docker-compose.yml"
 
 # Don't change variables below unless you want to customize the script
 VERSIONS_LOC="${APPDATA_LOC}/versions.txt"
