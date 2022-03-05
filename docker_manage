@@ -35,7 +35,9 @@ function backup {
 
     read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
     APPDATA_NAME=$(echo "$APPDATA_LOC" | awk -F/ '{print $NF}')
+    echo "Sichere \"docker-compose.yml\""
     cp -a "$COMPOSE_LOC" "$APPDATA_LOC"/docker-compose.yml.bak
+    echo "Sichere \"$APPDATA_LOC\""
     tar -C "$APPDATA_LOC"/.. -czf "$APPDATA_LOC"/../appdatabackup.tar.gz "$APPDATA_NAME"
 
     read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
@@ -70,7 +72,9 @@ function update {
 
     read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
     APPDATA_NAME=$(echo "$APPDATA_LOC" | awk -F/ '{print $NF}')
+    echo "Sichere \"docker-compose.yml\""
     cp -a "$COMPOSE_LOC" "$APPDATA_LOC"/docker-compose.yml.bak
+    echo "Sichere \"$APPDATA_LOC\""
     tar -C "$APPDATA_LOC"/.. -czf "$APPDATA_LOC"/../appdatabackup.tar.gz "$APPDATA_NAME"
 
     read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
