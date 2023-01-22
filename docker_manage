@@ -8,23 +8,14 @@ COMPOSE_LOC="/opt/docker-compose.yml"
 VERSIONS_LOC="${APPDATA_LOC}/versions.txt"
 
 function backup {
-    if [ ! -f "$VERSIONS_LOC" ];then
-        for i in $(docker-compose -f "$COMPOSE_LOC" config --services); do
-            container_name=$(docker run --rm -v "$(dirname $COMPOSE_LOC)":/workdir mikefarah/yq:4 e .services."${i}".container_name "$(awk -F/ '{print $NF}' <<< $COMPOSE_LOC)")
-            image_name=$(docker inspect --format='{{ index .Config.Image }}' "$container_name")
-            repo_digest=$(docker inspect --format='{{ index .RepoDigests 0 }}' "$(docker inspect --format='{{ .Image }}' "$container_name")")
-            echo "$container_name,$image_name,$repo_digest" >> "$VERSIONS_LOC"
-        done
-    else
-        mv "$VERSIONS_LOC" "${VERSIONS_LOC}.bak"
-        while IFS= read -r line; do
-            container_name=$(echo "$line" | awk -F, '{print $1}')
-            image_name=$(echo "$line" | awk -F, '{print $2}')
-            repo_digest=$(docker inspect --format='{{ index .RepoDigests 0 }}' "$(docker inspect --format='{{ .Image }}' "$container_name")")
-            echo "$container_name,$image_name,$repo_digest" >> "$VERSIONS_LOC"
-        done < <(cat "${VERSIONS_LOC}.bak")
-        rm "${VERSIONS_LOC}.bak"
-    fi
+    mv "$VERSIONS_LOC" "${VERSIONS_LOC}.bak"
+    for i in $(docker-compose -f "$COMPOSE_LOC" config --services); do
+        container_name=$(docker run --rm -v "$(dirname $COMPOSE_LOC)":/workdir mikefarah/yq:4 e .services."${i}".container_name "$(awk -F/ '{print $NF}' <<< $COMPOSE_LOC)")
+        image_name=$(docker inspect --format='{{ index .Config.Image }}' "$container_name")
+        repo_digest=$(docker inspect --format='{{ index .RepoDigests 0 }}' "$(docker inspect --format='{{ .Image }}' "$container_name")")
+        echo "$container_name,$image_name,$repo_digest" >> "$VERSIONS_LOC"
+    done
+    rm "${VERSIONS_LOC}.bak"
 
     read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
     docker-compose -f "$COMPOSE_LOC" down
@@ -42,23 +33,14 @@ function backup {
 }
 
 function update {
-    if [ ! -f "$VERSIONS_LOC" ];then
-        for i in $(docker-compose -f "$COMPOSE_LOC" config --services); do
-            container_name=$(docker run --rm -v "$(dirname $COMPOSE_LOC)":/workdir mikefarah/yq:4 e .services."${i}".container_name "$(awk -F/ '{print $NF}' <<< $COMPOSE_LOC)")
-            image_name=$(docker inspect --format='{{ index .Config.Image }}' "$container_name")
-            repo_digest=$(docker inspect --format='{{ index .RepoDigests 0 }}' "$(docker inspect --format='{{ .Image }}' "$container_name")")
-            echo "$container_name,$image_name,$repo_digest" >> "$VERSIONS_LOC"
-        done
-    else
-        mv "$VERSIONS_LOC" "${VERSIONS_LOC}.bak"
-        while IFS= read -r line; do
-            container_name=$(echo "$line" | awk -F, '{print $1}')
-            image_name=$(echo "$line" | awk -F, '{print $2}')
-            repo_digest=$(docker inspect --format='{{ index .RepoDigests 0 }}' "$(docker inspect --format='{{ .Image }}' "$container_name")")
-            echo "$container_name,$image_name,$repo_digest" >> "$VERSIONS_LOC"
-        done < <(cat "${VERSIONS_LOC}.bak")
-        rm "${VERSIONS_LOC}.bak"
-    fi
+    mv "$VERSIONS_LOC" "${VERSIONS_LOC}.bak"
+    for i in $(docker-compose -f "$COMPOSE_LOC" config --services); do
+        container_name=$(docker run --rm -v "$(dirname $COMPOSE_LOC)":/workdir mikefarah/yq:4 e .services."${i}".container_name "$(awk -F/ '{print $NF}' <<< $COMPOSE_LOC)")
+        image_name=$(docker inspect --format='{{ index .Config.Image }}' "$container_name")
+        repo_digest=$(docker inspect --format='{{ index .RepoDigests 0 }}' "$(docker inspect --format='{{ .Image }}' "$container_name")")
+        echo "$container_name,$image_name,$repo_digest" >> "$VERSIONS_LOC"
+    done
+    rm "${VERSIONS_LOC}.bak"
 
     read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
     docker-compose -f "$COMPOSE_LOC" pull
