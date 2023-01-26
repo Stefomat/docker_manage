@@ -17,17 +17,17 @@ function backup {
     done
     [ -f "${VERSIONS_LOC}.bak" ] && rm "${VERSIONS_LOC}.bak"
 
-    read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
+    read -r -p "Continue with Enter or cancel with CTRL+C..."
     docker-compose -f "$COMPOSE_LOC" down
 
-    read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
+    read -r -p "Continue with Enter or cancel with CTRL+C..."
     APPDATA_NAME=$(echo "$APPDATA_LOC" | awk -F/ '{print $NF}')
-    echo "Sichere \"docker-compose.yml\""
+    echo "Backing up \"docker-compose.yml\""
     cp -a "$COMPOSE_LOC" "$APPDATA_LOC"/docker-compose.yml.bak
-    echo "Sichere \"$APPDATA_LOC\""
+    echo "Backing up \"$APPDATA_LOC\""
     tar -C "$APPDATA_LOC"/.. -cf - "$APPDATA_NAME" | pv -terb -s $(du -sb "$APPDATA_LOC" | awk '{print $1}') | gzip > "$APPDATA_LOC"/../appdatabackup.tar.gz
 
-    read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
+    read -r -p "Continue with Enter or cancel with CTRL+C..."
     docker-compose -f "$COMPOSE_LOC" up -d
     chown "${USER}":"${USER}" "$APPDATA_LOC"/../appdatabackup.tar.gz
 }
@@ -42,31 +42,31 @@ function update {
     done
     [ -f "${VERSIONS_LOC}.bak" ] && rm "${VERSIONS_LOC}.bak"
 
-    read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
+    read -r -p "Continue with Enter or cancel with CTRL+C..."
     docker-compose -f "$COMPOSE_LOC" pull
 
-    read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
+    read -r -p "Continue with Enter or cancel with CTRL+C..."
     docker-compose -f "$COMPOSE_LOC" down
 
-    read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
+    read -r -p "Continue with Enter or cancel with CTRL+C..."
     APPDATA_NAME=$(echo "$APPDATA_LOC" | awk -F/ '{print $NF}')
-    echo "Sichere \"docker-compose.yml\""
+    echo "Backing up \"docker-compose.yml\""
     cp -a "$COMPOSE_LOC" "$APPDATA_LOC"/docker-compose.yml.bak
-    echo "Sichere \"$APPDATA_LOC\""
+    echo "Backing up \"$APPDATA_LOC\""
     tar -C "$APPDATA_LOC"/.. -cf - "$APPDATA_NAME" | pv -terb -s $(du -sb "$APPDATA_LOC" | awk '{print $1}') | gzip > "$APPDATA_LOC"/../appdatabackup.tar.gz
 
-    read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
+    read -r -p "Continue with Enter or cancel with CTRL+C..."
     docker-compose -f "$COMPOSE_LOC" up -d
     chown "${USER}":"${USER}" "$APPDATA_LOC"/../appdatabackup.tar.gz
 
-    read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
+    read -r -p "Continue with Enter or cancel with CTRL+C..."
     docker image prune -f
 }
 
 function restore {
     docker-compose -f "$COMPOSE_LOC" down
 
-    read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
+    read -r -p "Continue with Enter or cancel with CTRL+C..."
     randstr=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c"${1:-8}";echo;)
     mv "$APPDATA_LOC" "${APPDATA_LOC}.$randstr"
     cp -a "$COMPOSE_LOC" "${COMPOSE_LOC}.$randstr"
@@ -78,10 +78,10 @@ function restore {
         sed -i "s#image: ${image_name}#image: ${repo_digest}#g" "$COMPOSE_LOC"
     done < <(cat "$VERSIONS_LOC")
 
-    read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
+    read -r -p "Continue with Enter or cancel with CTRL+C..."
     docker-compose -f "$COMPOSE_LOC" pull
 
-    read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
+    read -r -p "Continue with Enter or cancel with CTRL+C..."
     docker-compose -f "$COMPOSE_LOC" up -d
 }
 
@@ -92,10 +92,10 @@ function resume {
         sed -i "s#image: ${repo_digest}#image: ${image_name}#g" "$COMPOSE_LOC"
     done < <(cat "$VERSIONS_LOC")
 
-    read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
+    read -r -p "Continue with Enter or cancel with CTRL+C..."
     docker-compose -f "$COMPOSE_LOC" pull
 
-    read -r -p "Weiter mit Enter oder Abbruch mit STRG+C..."
+    read -r -p "Continue with Enter or cancel with CTRL+C..."
     docker-compose -f "$COMPOSE_LOC" up -d
 }
 
