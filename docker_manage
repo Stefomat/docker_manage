@@ -8,6 +8,7 @@ COMPOSE_LOC="/opt/docker-compose.yml"
 VERSIONS_LOC="${APPDATA_LOC}/versions.txt"
 
 function backup {
+    echo "Detecting containers"
     [ -f "$VERSIONS_LOC" ] && mv "$VERSIONS_LOC" "${VERSIONS_LOC}.bak"
     for i in $(docker-compose -f "$COMPOSE_LOC" config --services); do
         container_name=$(docker run --rm -v "$(dirname "$COMPOSE_LOC")":/workdir mikefarah/yq:4 e .services."${i}".container_name "$(awk -F/ '{print $NF}' <<< "$COMPOSE_LOC")")
@@ -18,6 +19,7 @@ function backup {
     [ -f "${VERSIONS_LOC}.bak" ] && rm "${VERSIONS_LOC}.bak"
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
+    echo "Stopping stack"
     docker-compose -f "$COMPOSE_LOC" down
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
@@ -28,11 +30,13 @@ function backup {
     tar -C "$APPDATA_LOC"/.. -cf - "$APPDATA_NAME" | pv -terb -s $(du -sb "$APPDATA_LOC" | awk '{print $1}') | gzip > "$APPDATA_LOC"/../appdatabackup.tar.gz
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
+    echo "Starting stack"
     docker-compose -f "$COMPOSE_LOC" up -d
     chown "${USER}":"${USER}" "$APPDATA_LOC"/../appdatabackup.tar.gz
 }
 
 function update {
+    echo "Detecting containers"
     [ -f "$VERSIONS_LOC" ] && mv "$VERSIONS_LOC" "${VERSIONS_LOC}.bak"
     for i in $(docker-compose -f "$COMPOSE_LOC" config --services); do
         container_name=$(docker run --rm -v "$(dirname "$COMPOSE_LOC")":/workdir mikefarah/yq:4 e .services."${i}".container_name "$(awk -F/ '{print $NF}' <<< "$COMPOSE_LOC")")
@@ -43,9 +47,11 @@ function update {
     [ -f "${VERSIONS_LOC}.bak" ] && rm "${VERSIONS_LOC}.bak"
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
+    echo "Pulling images"
     docker-compose -f "$COMPOSE_LOC" pull
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
+    echo "Stopping stack"
     docker-compose -f "$COMPOSE_LOC" down
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
@@ -56,17 +62,21 @@ function update {
     tar -C "$APPDATA_LOC"/.. -cf - "$APPDATA_NAME" | pv -terb -s $(du -sb "$APPDATA_LOC" | awk '{print $1}') | gzip > "$APPDATA_LOC"/../appdatabackup.tar.gz
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
+    echo "Starting stack"
     docker-compose -f "$COMPOSE_LOC" up -d
     chown "${USER}":"${USER}" "$APPDATA_LOC"/../appdatabackup.tar.gz
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
+    echo "Pruning images"
     docker image prune -f
 }
 
 function restore {
+    echo "Stopping stack"
     docker-compose -f "$COMPOSE_LOC" down
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
+    echo "Restoring backup"
     randstr=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c"${1:-8}";echo;)
     mv "$APPDATA_LOC" "${APPDATA_LOC}.$randstr"
     cp -a "$COMPOSE_LOC" "${COMPOSE_LOC}.$randstr"
@@ -79,13 +89,16 @@ function restore {
     done < <(cat "$VERSIONS_LOC")
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
+    echo "Pulling images"
     docker-compose -f "$COMPOSE_LOC" pull
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
+    echo "Starting stack"
     docker-compose -f "$COMPOSE_LOC" up -d
 }
 
 function resume {
+    echo "Resuming"
     while IFS= read -r line; do
         image_name="$(echo "$line" | awk -F, '{print $2}')"
         repo_digest="$(echo "$line" | awk -F, '{print $3}')"
@@ -93,9 +106,11 @@ function resume {
     done < <(cat "$VERSIONS_LOC")
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
+    echo "Pulling images"
     docker-compose -f "$COMPOSE_LOC" pull
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
+    echo "Starting stack"
     docker-compose -f "$COMPOSE_LOC" up -d
 }
 
