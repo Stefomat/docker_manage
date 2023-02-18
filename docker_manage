@@ -7,10 +7,24 @@ COMPOSE_LOC="/opt/docker-compose.yml"
 # Don't change variables below unless you want to customize the script
 VERSIONS_LOC="${APPDATA_LOC}/versions.txt"
 
+# Functions
+detect_docker_compose_command(){
+  if docker compose > /dev/null 2>&1; then
+    COMPOSE_COMMAND="docker compose"
+  elif docker-compose > /dev/null 2>&1; then
+    if ! [[ $(alias docker-compose 2> /dev/null) ]] ; then
+      COMPOSE_COMMAND="docker-compose"
+    fi
+  else
+    echo -e "\e[31mCannot find Docker Compose.\e[0m"
+    exit 1
+  fi
+}
+
 function backup {
     echo "Detecting containers"
     [ -f "$VERSIONS_LOC" ] && mv "$VERSIONS_LOC" "${VERSIONS_LOC}.bak"
-    for i in $(docker-compose -f "$COMPOSE_LOC" config --services); do
+    for i in $("$COMPOSE_COMMAND" -f "$COMPOSE_LOC" config --services); do
         container_name=$(docker run --rm -v "$(dirname "$COMPOSE_LOC")":/workdir mikefarah/yq:4 e .services."${i}".container_name "$(awk -F/ '{print $NF}' <<< "$COMPOSE_LOC")")
         image_name=$(docker inspect --format='{{ index .Config.Image }}' "$container_name")
         repo_digest=$(docker inspect --format='{{ index .RepoDigests 0 }}' "$(docker inspect --format='{{ .Image }}' "$container_name")")
@@ -20,7 +34,7 @@ function backup {
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Stopping stack"
-    docker-compose -f "$COMPOSE_LOC" down
+    "$COMPOSE_COMMAND" -f "$COMPOSE_LOC" down
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     APPDATA_NAME=$(echo "$APPDATA_LOC" | awk -F/ '{print $NF}')
@@ -31,14 +45,14 @@ function backup {
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Starting stack"
-    docker-compose -f "$COMPOSE_LOC" up -d
+    "$COMPOSE_COMMAND" -f "$COMPOSE_LOC" up -d
     chown "${USER}":"${USER}" "$APPDATA_LOC"/../appdatabackup.tar.gz
 }
 
 function update {
     echo "Detecting containers"
     [ -f "$VERSIONS_LOC" ] && mv "$VERSIONS_LOC" "${VERSIONS_LOC}.bak"
-    for i in $(docker-compose -f "$COMPOSE_LOC" config --services); do
+    for i in $("$COMPOSE_COMMAND" -f "$COMPOSE_LOC" config --services); do
         container_name=$(docker run --rm -v "$(dirname "$COMPOSE_LOC")":/workdir mikefarah/yq:4 e .services."${i}".container_name "$(awk -F/ '{print $NF}' <<< "$COMPOSE_LOC")")
         image_name=$(docker inspect --format='{{ index .Config.Image }}' "$container_name")
         repo_digest=$(docker inspect --format='{{ index .RepoDigests 0 }}' "$(docker inspect --format='{{ .Image }}' "$container_name")")
@@ -48,11 +62,11 @@ function update {
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Pulling images"
-    docker-compose -f "$COMPOSE_LOC" pull
+    "$COMPOSE_COMMAND" -f "$COMPOSE_LOC" pull
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Stopping stack"
-    docker-compose -f "$COMPOSE_LOC" down
+    "$COMPOSE_COMMAND" -f "$COMPOSE_LOC" down
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     APPDATA_NAME=$(echo "$APPDATA_LOC" | awk -F/ '{print $NF}')
@@ -63,7 +77,7 @@ function update {
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Starting stack"
-    docker-compose -f "$COMPOSE_LOC" up -d
+    "$COMPOSE_COMMAND" -f "$COMPOSE_LOC" up -d
     chown "${USER}":"${USER}" "$APPDATA_LOC"/../appdatabackup.tar.gz
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
@@ -73,7 +87,7 @@ function update {
 
 function restore {
     echo "Stopping stack"
-    docker-compose -f "$COMPOSE_LOC" down
+    "$COMPOSE_COMMAND" -f "$COMPOSE_LOC" down
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Restoring backup"
@@ -90,11 +104,11 @@ function restore {
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Pulling images"
-    docker-compose -f "$COMPOSE_LOC" pull
+    "$COMPOSE_COMMAND" -f "$COMPOSE_LOC" pull
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Starting stack"
-    docker-compose -f "$COMPOSE_LOC" up -d
+    "$COMPOSE_COMMAND" -f "$COMPOSE_LOC" up -d
 }
 
 function resume {
@@ -107,15 +121,16 @@ function resume {
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Pulling images"
-    docker-compose -f "$COMPOSE_LOC" pull
+    "$COMPOSE_COMMAND" -f "$COMPOSE_LOC" pull
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Starting stack"
-    docker-compose -f "$COMPOSE_LOC" up -d
+    "$COMPOSE_COMMAND" -f "$COMPOSE_LOC" up -d
 }
 
 # Check if the function exists
 if declare -f "$1" > /dev/null; then
+  detect_docker_compose_command
   "$@"
 else
   echo "The only valid arguments are backup, update, restore, and resume"
