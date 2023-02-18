@@ -11,7 +11,7 @@ VERSIONS_LOC="${APPDATA_LOC}/versions.txt"
 function detect_docker_compose_command {
   if docker compose > /dev/null 2>&1; then
     COMPOSE_COMMAND="docker compose"
-  elif docker-compose > /dev/null 2>&1; then
+  elif command -v docker-compose > /dev/null 2>&1; then
     if ! [[ $(alias docker-compose 2> /dev/null) ]] ; then
       COMPOSE_COMMAND="docker-compose"
     fi
