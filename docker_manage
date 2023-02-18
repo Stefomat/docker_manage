@@ -31,7 +31,7 @@ function detect_docker_compose_file {
 function backup {
     echo "Detecting containers"
     [ -f "$VERSIONS_FILE_WITH_PATH" ] && mv "$VERSIONS_FILE_WITH_PATH" "${VERSIONS_FILE_WITH_PATH}.bak"
-    for i in $("$COMPOSE_COMMAND" -f "$COMPOSE_FILE_WITH_PATH" config --services); do
+    for i in $($COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" config --services); do
         container_name=$(docker run --rm -v "$(dirname "$COMPOSE_FILE_WITH_PATH")":/workdir mikefarah/yq:4 e .services."${i}".container_name "$(awk -F/ '{print $NF}' <<< "$COMPOSE_FILE_WITH_PATH")")
         image_name=$(docker inspect --format='{{ index .Config.Image }}' "$container_name")
         repo_digest=$(docker inspect --format='{{ index .RepoDigests 0 }}' "$(docker inspect --format='{{ .Image }}' "$container_name")")
@@ -41,7 +41,7 @@ function backup {
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Stopping stack"
-    "$COMPOSE_COMMAND" -f "$COMPOSE_FILE_WITH_PATH" down
+    $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" down
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     APPDATA_NAME=$(echo "$APPDATA_FOLDER_WITH_PATH" | awk -F/ '{print $NF}')
@@ -52,14 +52,14 @@ function backup {
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Starting stack"
-    "$COMPOSE_COMMAND" -f "$COMPOSE_FILE_WITH_PATH" up -d
+    $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" up -d
     chown "${USER}":"${USER}" "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar.gz
 }
 
 function update {
     echo "Detecting containers"
     [ -f "$VERSIONS_FILE_WITH_PATH" ] && mv "$VERSIONS_FILE_WITH_PATH" "${VERSIONS_FILE_WITH_PATH}.bak"
-    for i in $("$COMPOSE_COMMAND" -f "$COMPOSE_FILE_WITH_PATH" config --services); do
+    for i in $($COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" config --services); do
         container_name=$(docker run --rm -v "$(dirname "$COMPOSE_FILE_WITH_PATH")":/workdir mikefarah/yq:4 e .services."${i}".container_name "$(awk -F/ '{print $NF}' <<< "$COMPOSE_FILE_WITH_PATH")")
         image_name=$(docker inspect --format='{{ index .Config.Image }}' "$container_name")
         repo_digest=$(docker inspect --format='{{ index .RepoDigests 0 }}' "$(docker inspect --format='{{ .Image }}' "$container_name")")
@@ -69,11 +69,11 @@ function update {
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Pulling images"
-    "$COMPOSE_COMMAND" -f "$COMPOSE_FILE_WITH_PATH" pull
+    $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" pull
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Stopping stack"
-    "$COMPOSE_COMMAND" -f "$COMPOSE_FILE_WITH_PATH" down
+    $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" down
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     APPDATA_NAME=$(echo "$APPDATA_FOLDER_WITH_PATH" | awk -F/ '{print $NF}')
@@ -84,7 +84,7 @@ function update {
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Starting stack"
-    "$COMPOSE_COMMAND" -f "$COMPOSE_FILE_WITH_PATH" up -d
+    $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" up -d
     chown "${USER}":"${USER}" "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar.gz
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
@@ -94,7 +94,7 @@ function update {
 
 function restore {
     echo "Stopping stack"
-    "$COMPOSE_COMMAND" -f "$COMPOSE_FILE_WITH_PATH" down
+    $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" down
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Restoring backup"
@@ -111,11 +111,11 @@ function restore {
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Pulling images"
-    "$COMPOSE_COMMAND" -f "$COMPOSE_FILE_WITH_PATH" pull
+    $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" pull
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Starting stack"
-    "$COMPOSE_COMMAND" -f "$COMPOSE_FILE_WITH_PATH" up -d
+    $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" up -d
 }
 
 function resume {
@@ -128,11 +128,11 @@ function resume {
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Pulling images"
-    "$COMPOSE_COMMAND" -f "$COMPOSE_FILE_WITH_PATH" pull
+    $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" pull
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Starting stack"
-    "$COMPOSE_COMMAND" -f "$COMPOSE_FILE_WITH_PATH" up -d
+    $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" up -d
 }
 
 # Check if the function exists
