@@ -1,8 +1,8 @@
 #!/usr/bin/bash
 
 # Change variables here:
-APPDATA_LOC="/opt/appdata"
-COMPOSE_LOC="/opt/docker-compose.yml"
+APPDATA_LOC="${PWD}/appdata"
+COMPOSE_LOC="${PWD}/docker-compose.yml"
 
 # Don't change variables below unless you want to customize the script
 VERSIONS_LOC="${APPDATA_LOC}/versions.txt"
