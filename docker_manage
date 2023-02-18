@@ -1,11 +1,11 @@
 #!/usr/bin/bash
 
 # Change variables here:
-APPDATA_LOC="${PWD}/appdata"
-COMPOSE_LOC="${PWD}/docker-compose.yml"
+APPDATA_FOLDER_WITH_PATH="${PWD}/appdata"
+COMPOSE_FILE_WITH_PATH="${PWD}/docker-compose.yml"
 
 # Don't change variables below unless you want to customize the script
-VERSIONS_LOC="${APPDATA_LOC}/versions.txt"
+VERSIONS_FILE_WITH_PATH="${APPDATA_FOLDER_WITH_PATH}/versions.txt"
 
 # Functions
 function detect_docker_compose_command {
@@ -22,7 +22,7 @@ function detect_docker_compose_command {
 }
 
 function detect_docker_compose_file {
-  if [ ! -f "$COMPOSE_LOC" ]; then
+  if [ ! -f "$COMPOSE_FILE_WITH_PATH" ]; then
     echo -e "\e[31mCannot find Docker Compose File.\e[0m"
     exit 1
   fi
@@ -30,62 +30,62 @@ function detect_docker_compose_file {
 
 function backup {
     echo "Detecting containers"
-    [ -f "$VERSIONS_LOC" ] && mv "$VERSIONS_LOC" "${VERSIONS_LOC}.bak"
-    for i in $("$COMPOSE_COMMAND" -f "$COMPOSE_LOC" config --services); do
-        container_name=$(docker run --rm -v "$(dirname "$COMPOSE_LOC")":/workdir mikefarah/yq:4 e .services."${i}".container_name "$(awk -F/ '{print $NF}' <<< "$COMPOSE_LOC")")
+    [ -f "$VERSIONS_FILE_WITH_PATH" ] && mv "$VERSIONS_FILE_WITH_PATH" "${VERSIONS_FILE_WITH_PATH}.bak"
+    for i in $("$COMPOSE_COMMAND" -f "$COMPOSE_FILE_WITH_PATH" config --services); do
+        container_name=$(docker run --rm -v "$(dirname "$COMPOSE_FILE_WITH_PATH")":/workdir mikefarah/yq:4 e .services."${i}".container_name "$(awk -F/ '{print $NF}' <<< "$COMPOSE_FILE_WITH_PATH")")
         image_name=$(docker inspect --format='{{ index .Config.Image }}' "$container_name")
         repo_digest=$(docker inspect --format='{{ index .RepoDigests 0 }}' "$(docker inspect --format='{{ .Image }}' "$container_name")")
-        echo "$container_name,$image_name,$repo_digest" >> "$VERSIONS_LOC"
+        echo "$container_name,$image_name,$repo_digest" >> "$VERSIONS_FILE_WITH_PATH"
     done
-    [ -f "${VERSIONS_LOC}.bak" ] && rm "${VERSIONS_LOC}.bak"
+    [ -f "${VERSIONS_FILE_WITH_PATH}.bak" ] && rm "${VERSIONS_FILE_WITH_PATH}.bak"
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Stopping stack"
-    "$COMPOSE_COMMAND" -f "$COMPOSE_LOC" down
+    "$COMPOSE_COMMAND" -f "$COMPOSE_FILE_WITH_PATH" down
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
-    APPDATA_NAME=$(echo "$APPDATA_LOC" | awk -F/ '{print $NF}')
+    APPDATA_NAME=$(echo "$APPDATA_FOLDER_WITH_PATH" | awk -F/ '{print $NF}')
     echo "Backing up \"docker-compose.yml\""
-    cp -a "$COMPOSE_LOC" "$APPDATA_LOC"/docker-compose.yml.bak
-    echo "Backing up \"$APPDATA_LOC\""
-    tar -C "$APPDATA_LOC"/.. -cf - "$APPDATA_NAME" | pv -terb -s $(du -sb "$APPDATA_LOC" | awk '{print $1}') | gzip > "$APPDATA_LOC"/../appdatabackup.tar.gz
+    cp -a "$COMPOSE_FILE_WITH_PATH" "$APPDATA_FOLDER_WITH_PATH"/docker-compose.yml.bak
+    echo "Backing up \"$APPDATA_FOLDER_WITH_PATH\""
+    tar -C "$APPDATA_FOLDER_WITH_PATH"/.. -cf - "$APPDATA_NAME" | pv -terb -s $(du -sb "$APPDATA_FOLDER_WITH_PATH" | awk '{print $1}') | gzip > "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar.gz
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Starting stack"
-    "$COMPOSE_COMMAND" -f "$COMPOSE_LOC" up -d
-    chown "${USER}":"${USER}" "$APPDATA_LOC"/../appdatabackup.tar.gz
+    "$COMPOSE_COMMAND" -f "$COMPOSE_FILE_WITH_PATH" up -d
+    chown "${USER}":"${USER}" "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar.gz
 }
 
 function update {
     echo "Detecting containers"
-    [ -f "$VERSIONS_LOC" ] && mv "$VERSIONS_LOC" "${VERSIONS_LOC}.bak"
-    for i in $("$COMPOSE_COMMAND" -f "$COMPOSE_LOC" config --services); do
-        container_name=$(docker run --rm -v "$(dirname "$COMPOSE_LOC")":/workdir mikefarah/yq:4 e .services."${i}".container_name "$(awk -F/ '{print $NF}' <<< "$COMPOSE_LOC")")
+    [ -f "$VERSIONS_FILE_WITH_PATH" ] && mv "$VERSIONS_FILE_WITH_PATH" "${VERSIONS_FILE_WITH_PATH}.bak"
+    for i in $("$COMPOSE_COMMAND" -f "$COMPOSE_FILE_WITH_PATH" config --services); do
+        container_name=$(docker run --rm -v "$(dirname "$COMPOSE_FILE_WITH_PATH")":/workdir mikefarah/yq:4 e .services."${i}".container_name "$(awk -F/ '{print $NF}' <<< "$COMPOSE_FILE_WITH_PATH")")
         image_name=$(docker inspect --format='{{ index .Config.Image }}' "$container_name")
         repo_digest=$(docker inspect --format='{{ index .RepoDigests 0 }}' "$(docker inspect --format='{{ .Image }}' "$container_name")")
-        echo "$container_name,$image_name,$repo_digest" >> "$VERSIONS_LOC"
+        echo "$container_name,$image_name,$repo_digest" >> "$VERSIONS_FILE_WITH_PATH"
     done
-    [ -f "${VERSIONS_LOC}.bak" ] && rm "${VERSIONS_LOC}.bak"
+    [ -f "${VERSIONS_FILE_WITH_PATH}.bak" ] && rm "${VERSIONS_FILE_WITH_PATH}.bak"
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Pulling images"
-    "$COMPOSE_COMMAND" -f "$COMPOSE_LOC" pull
+    "$COMPOSE_COMMAND" -f "$COMPOSE_FILE_WITH_PATH" pull
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Stopping stack"
-    "$COMPOSE_COMMAND" -f "$COMPOSE_LOC" down
+    "$COMPOSE_COMMAND" -f "$COMPOSE_FILE_WITH_PATH" down
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
-    APPDATA_NAME=$(echo "$APPDATA_LOC" | awk -F/ '{print $NF}')
+    APPDATA_NAME=$(echo "$APPDATA_FOLDER_WITH_PATH" | awk -F/ '{print $NF}')
     echo "Backing up \"docker-compose.yml\""
-    cp -a "$COMPOSE_LOC" "$APPDATA_LOC"/docker-compose.yml.bak
-    echo "Backing up \"$APPDATA_LOC\""
-    tar -C "$APPDATA_LOC"/.. -cf - "$APPDATA_NAME" | pv -terb -s $(du -sb "$APPDATA_LOC" | awk '{print $1}') | gzip > "$APPDATA_LOC"/../appdatabackup.tar.gz
+    cp -a "$COMPOSE_FILE_WITH_PATH" "$APPDATA_FOLDER_WITH_PATH"/docker-compose.yml.bak
+    echo "Backing up \"$APPDATA_FOLDER_WITH_PATH\""
+    tar -C "$APPDATA_FOLDER_WITH_PATH"/.. -cf - "$APPDATA_NAME" | pv -terb -s $(du -sb "$APPDATA_FOLDER_WITH_PATH" | awk '{print $1}') | gzip > "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar.gz
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Starting stack"
-    "$COMPOSE_COMMAND" -f "$COMPOSE_LOC" up -d
-    chown "${USER}":"${USER}" "$APPDATA_LOC"/../appdatabackup.tar.gz
+    "$COMPOSE_COMMAND" -f "$COMPOSE_FILE_WITH_PATH" up -d
+    chown "${USER}":"${USER}" "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar.gz
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Pruning images"
@@ -94,28 +94,28 @@ function update {
 
 function restore {
     echo "Stopping stack"
-    "$COMPOSE_COMMAND" -f "$COMPOSE_LOC" down
+    "$COMPOSE_COMMAND" -f "$COMPOSE_FILE_WITH_PATH" down
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Restoring backup"
     randstr=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c"${1:-8}";echo;)
-    mv "$APPDATA_LOC" "${APPDATA_LOC}.$randstr"
-    cp -a "$COMPOSE_LOC" "${COMPOSE_LOC}.$randstr"
-    mkdir -p "$APPDATA_LOC"
-    gunzip --stdout "$APPDATA_LOC"/../appdatabackup.tar.gz | pv -terb -s $(du -sb "$APPDATA_LOC"/../appdatabackup.tar.gz | awk '{print $1}') | tar -C "$APPDATA_LOC"/../ -xf -
+    mv "$APPDATA_FOLDER_WITH_PATH" "${APPDATA_FOLDER_WITH_PATH}.$randstr"
+    cp -a "$COMPOSE_FILE_WITH_PATH" "${COMPOSE_FILE_WITH_PATH}.$randstr"
+    mkdir -p "$APPDATA_FOLDER_WITH_PATH"
+    gunzip --stdout "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar.gz | pv -terb -s $(du -sb "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar.gz | awk '{print $1}') | tar -C "$APPDATA_FOLDER_WITH_PATH"/../ -xf -
     while IFS= read -r line; do
         image_name=$(echo "$line" | awk -F, '{print $2}')
         repo_digest=$(echo "$line" | awk -F, '{print $3}')
-        sed -i "s#image: ${image_name}#image: ${repo_digest}#g" "$COMPOSE_LOC"
-    done < <(cat "$VERSIONS_LOC")
+        sed -i "s#image: ${image_name}#image: ${repo_digest}#g" "$COMPOSE_FILE_WITH_PATH"
+    done < <(cat "$VERSIONS_FILE_WITH_PATH")
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Pulling images"
-    "$COMPOSE_COMMAND" -f "$COMPOSE_LOC" pull
+    "$COMPOSE_COMMAND" -f "$COMPOSE_FILE_WITH_PATH" pull
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Starting stack"
-    "$COMPOSE_COMMAND" -f "$COMPOSE_LOC" up -d
+    "$COMPOSE_COMMAND" -f "$COMPOSE_FILE_WITH_PATH" up -d
 }
 
 function resume {
@@ -123,24 +123,24 @@ function resume {
     while IFS= read -r line; do
         image_name="$(echo "$line" | awk -F, '{print $2}')"
         repo_digest="$(echo "$line" | awk -F, '{print $3}')"
-        sed -i "s#image: ${repo_digest}#image: ${image_name}#g" "$COMPOSE_LOC"
-    done < <(cat "$VERSIONS_LOC")
+        sed -i "s#image: ${repo_digest}#image: ${image_name}#g" "$COMPOSE_FILE_WITH_PATH"
+    done < <(cat "$VERSIONS_FILE_WITH_PATH")
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Pulling images"
-    "$COMPOSE_COMMAND" -f "$COMPOSE_LOC" pull
+    "$COMPOSE_COMMAND" -f "$COMPOSE_FILE_WITH_PATH" pull
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Starting stack"
-    "$COMPOSE_COMMAND" -f "$COMPOSE_LOC" up -d
+    "$COMPOSE_COMMAND" -f "$COMPOSE_FILE_WITH_PATH" up -d
 }
 
 # Check if the function exists
 if declare -f "$1" > /dev/null; then
   detect_docker_compose_command
   echo "Using COMPOSE_COMMAND: $COMPOSE_COMMAND"
-  echo "Using COMPOSE_LOC: $COMPOSE_LOC"
-  echo "Using APPDATA_LOC: $APPDATA_LOC"
+  echo "Using COMPOSE_FILE_WITH_PATH: $COMPOSE_FILE_WITH_PATH"
+  echo "Using APPDATA_FOLDER_WITH_PATH: $APPDATA_FOLDER_WITH_PATH"
   detect_docker_compose_file
   "$@"
 else
