@@ -138,6 +138,9 @@ function resume {
 # Check if the function exists
 if declare -f "$1" > /dev/null; then
   detect_docker_compose_command
+  echo "Using COMPOSE_COMMAND: $COMPOSE_COMMAND"
+  echo "Using COMPOSE_LOC: $COMPOSE_LOC"
+  echo "Using APPDATA_LOC: $APPDATA_LOC"
   detect_docker_compose_file
   "$@"
 else
