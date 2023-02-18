@@ -21,6 +21,13 @@ detect_docker_compose_command(){
   fi
 }
 
+function detect_docker_compose_file {
+  if [ ! -f "$COMPOSE_LOC" ]; then
+    echo -e "\e[31mCannot find Docker Compose File.\e[0m"
+    exit 1
+  fi
+}
+
 function backup {
     echo "Detecting containers"
     [ -f "$VERSIONS_LOC" ] && mv "$VERSIONS_LOC" "${VERSIONS_LOC}.bak"
@@ -131,6 +138,7 @@ function resume {
 # Check if the function exists
 if declare -f "$1" > /dev/null; then
   detect_docker_compose_command
+  detect_docker_compose_file
   "$@"
 else
   echo "The only valid arguments are backup, update, restore, and resume"
