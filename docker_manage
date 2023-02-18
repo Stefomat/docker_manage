@@ -8,7 +8,7 @@ COMPOSE_LOC="${PWD}/docker-compose.yml"
 VERSIONS_LOC="${APPDATA_LOC}/versions.txt"
 
 # Functions
-detect_docker_compose_command(){
+function detect_docker_compose_command {
   if docker compose > /dev/null 2>&1; then
     COMPOSE_COMMAND="docker compose"
   elif docker-compose > /dev/null 2>&1; then
