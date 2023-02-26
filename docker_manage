@@ -48,7 +48,7 @@ function backup {
     echo "Backing up \"docker-compose.yml\""
     cp -a "$COMPOSE_FILE_WITH_PATH" "$APPDATA_FOLDER_WITH_PATH"/docker-compose.yml.bak
     echo "Backing up \"$APPDATA_FOLDER_WITH_PATH\""
-    tar -C "$APPDATA_FOLDER_WITH_PATH"/.. -cf - "$APPDATA_NAME" | pv -terb -s $(du -sb "$APPDATA_FOLDER_WITH_PATH" | awk '{print $1}') | gzip > "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar.gz
+    tar -C "$APPDATA_FOLDER_WITH_PATH"/.. -cf - "$APPDATA_NAME" | pv -s $(du -sb "$APPDATA_FOLDER_WITH_PATH" | awk '{print $1}') | gzip > "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar.gz
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Starting stack"
@@ -80,7 +80,7 @@ function update {
     echo "Backing up \"docker-compose.yml\""
     cp -a "$COMPOSE_FILE_WITH_PATH" "$APPDATA_FOLDER_WITH_PATH"/docker-compose.yml.bak
     echo "Backing up \"$APPDATA_FOLDER_WITH_PATH\""
-    tar -C "$APPDATA_FOLDER_WITH_PATH"/.. -cf - "$APPDATA_NAME" | pv -terb -s $(du -sb "$APPDATA_FOLDER_WITH_PATH" | awk '{print $1}') | gzip > "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar.gz
+    tar -C "$APPDATA_FOLDER_WITH_PATH"/.. -cf - "$APPDATA_NAME" | pv -s $(du -sb "$APPDATA_FOLDER_WITH_PATH" | awk '{print $1}') | gzip > "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar.gz
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Starting stack"
@@ -102,7 +102,7 @@ function restore {
     mv "$APPDATA_FOLDER_WITH_PATH" "${APPDATA_FOLDER_WITH_PATH}.$randstr"
     cp -a "$COMPOSE_FILE_WITH_PATH" "${COMPOSE_FILE_WITH_PATH}.$randstr"
     mkdir -p "$APPDATA_FOLDER_WITH_PATH"
-    gunzip --stdout "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar.gz | pv -terb -s $(du -sb "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar.gz | awk '{print $1}') | tar -C "$APPDATA_FOLDER_WITH_PATH"/../ -xf -
+    gunzip --stdout "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar.gz | pv -s $(du -sb "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar.gz | awk '{print $1}') | tar -C "$APPDATA_FOLDER_WITH_PATH"/../ -xf -
     while IFS= read -r line; do
         image_name=$(echo "$line" | awk -F, '{print $2}')
         repo_digest=$(echo "$line" | awk -F, '{print $3}')
