@@ -104,10 +104,9 @@ function restore {
 
   echo "Restoring backup"
   randstr=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c"${1:-8}";echo;)
-  mv "$APPDATA_FOLDER_WITH_PATH" "${APPDATA_FOLDER_WITH_PATH}.$randstr"
-  cp -a "$COMPOSE_FILE_WITH_PATH" "${COMPOSE_FILE_WITH_PATH}.$randstr"
-  mkdir -p "$APPDATA_FOLDER_WITH_PATH"
-  gunzip --stdout "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar.gz | pv -s "$(du -sb "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar.gz | awk '{print $1}')" | tar -C "$APPDATA_FOLDER_WITH_PATH"/../ -xf -
+  mv "$STACK_FOLDER_WITH_PATH" "${STACK_FOLDER_WITH_PATH}.$randstr"
+  mkdir -p "$STACK_FOLDER_WITH_PATH"
+  gunzip --stdout "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME".tar.gz | pv -s "$(du -sb "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME".tar.gz | awk '{print $1}')" | tar -C "$STACK_FOLDER_WITH_PATH"/.. -xf -
   while IFS= read -r line; do
       image_name=$(echo "$line" | awk -F, '{print $2}')
       repo_digest=$(echo "$line" | awk -F, '{print $3}')
