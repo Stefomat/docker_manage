@@ -48,19 +48,19 @@ function backup {
       echo "$container_name,$image_name,$repo_digest" >> "$VERSIONS_FILE_WITH_PATH"
   done
   [ -f "${VERSIONS_FILE_WITH_PATH}.bak" ] && rm "${VERSIONS_FILE_WITH_PATH}.bak"
-
   read -r -p "Continue with Enter or cancel with CTRL+C..."
+
   echo "Stopping stack"
   $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" down
-
   read -r -p "Continue with Enter or cancel with CTRL+C..."
+
   APPDATA_NAME=$(echo "$APPDATA_FOLDER_WITH_PATH" | awk -F/ '{print $NF}')
   echo "Backing up \"docker-compose.yml\""
   cp -a "$COMPOSE_FILE_WITH_PATH" "$APPDATA_FOLDER_WITH_PATH"/docker-compose.yml.bak
   echo "Backing up \"$APPDATA_FOLDER_WITH_PATH\""
   tar -C "$APPDATA_FOLDER_WITH_PATH"/.. -cf - "$APPDATA_NAME" | pv -s $(du -sb "$APPDATA_FOLDER_WITH_PATH" | awk '{print $1}') | gzip > "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar.gz
-
   read -r -p "Continue with Enter or cancel with CTRL+C..."
+
   echo "Starting stack"
   $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" up -d
   chown "${USER}":"${USER}" "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar.gz
@@ -76,28 +76,28 @@ function update {
       echo "$container_name,$image_name,$repo_digest" >> "$VERSIONS_FILE_WITH_PATH"
   done
   [ -f "${VERSIONS_FILE_WITH_PATH}.bak" ] && rm "${VERSIONS_FILE_WITH_PATH}.bak"
-
   read -r -p "Continue with Enter or cancel with CTRL+C..."
+
   echo "Pulling images"
   $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" pull
-
   read -r -p "Continue with Enter or cancel with CTRL+C..."
+
   echo "Stopping stack"
   $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" down
-
   read -r -p "Continue with Enter or cancel with CTRL+C..."
+
   APPDATA_NAME=$(echo "$APPDATA_FOLDER_WITH_PATH" | awk -F/ '{print $NF}')
   echo "Backing up \"docker-compose.yml\""
   cp -a "$COMPOSE_FILE_WITH_PATH" "$APPDATA_FOLDER_WITH_PATH"/docker-compose.yml.bak
   echo "Backing up \"$APPDATA_FOLDER_WITH_PATH\""
   tar -C "$APPDATA_FOLDER_WITH_PATH"/.. -cf - "$APPDATA_NAME" | pv -s $(du -sb "$APPDATA_FOLDER_WITH_PATH" | awk '{print $1}') | gzip > "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar.gz
-
   read -r -p "Continue with Enter or cancel with CTRL+C..."
+
   echo "Starting stack"
   $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" up -d
   chown "${USER}":"${USER}" "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar.gz
-
   read -r -p "Continue with Enter or cancel with CTRL+C..."
+
   echo "Pruning images"
   docker image prune -f
 }
@@ -105,8 +105,8 @@ function update {
 function restore {
   echo "Stopping stack"
   $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" down
-
   read -r -p "Continue with Enter or cancel with CTRL+C..."
+
   echo "Restoring backup"
   randstr=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c"${1:-8}";echo;)
   mv "$APPDATA_FOLDER_WITH_PATH" "${APPDATA_FOLDER_WITH_PATH}.$randstr"
@@ -118,12 +118,12 @@ function restore {
       repo_digest=$(echo "$line" | awk -F, '{print $3}')
       sed -i "s#image: ${image_name}#image: ${repo_digest}#g" "$COMPOSE_FILE_WITH_PATH"
   done < <(cat "$VERSIONS_FILE_WITH_PATH")
-
   read -r -p "Continue with Enter or cancel with CTRL+C..."
+
   echo "Pulling images"
   $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" pull
-
   read -r -p "Continue with Enter or cancel with CTRL+C..."
+
   echo "Starting stack"
   $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" up -d
 }
@@ -135,12 +135,12 @@ function resume {
       repo_digest="$(echo "$line" | awk -F, '{print $3}')"
       sed -i "s#image: ${repo_digest}#image: ${image_name}#g" "$COMPOSE_FILE_WITH_PATH"
   done < <(cat "$VERSIONS_FILE_WITH_PATH")
-
   read -r -p "Continue with Enter or cancel with CTRL+C..."
+
   echo "Pulling images"
   $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" pull
-
   read -r -p "Continue with Enter or cancel with CTRL+C..."
+
   echo "Starting stack"
   $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" up -d
 }
