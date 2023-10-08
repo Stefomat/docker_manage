@@ -54,7 +54,7 @@ function backup {
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 
   echo "Backing up stack"
-  tar -C "$STACK_FOLDER_WITH_PATH"/.. -cf - "$STACK_FOLDER_NAME" | pv -s $(du -sb "$STACK_FOLDER_WITH_PATH" | awk '{print $1}') | gzip > "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME".tar.gz
+  tar -C "$STACK_FOLDER_WITH_PATH"/.. -cf - "$STACK_FOLDER_NAME" | pv -s "$(du -sb "$STACK_FOLDER_WITH_PATH" | awk '{print $1}')" | gzip > "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME".tar.gz
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 
   echo "Starting stack"
@@ -84,7 +84,7 @@ function update {
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 
   echo "Backing up stack"
-  tar -C "$STACK_FOLDER_WITH_PATH"/.. -cf - "$STACK_FOLDER_NAME" | pv -s $(du -sb "$STACK_FOLDER_WITH_PATH" | awk '{print $1}') | gzip > "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME".tar.gz
+  tar -C "$STACK_FOLDER_WITH_PATH"/.. -cf - "$STACK_FOLDER_NAME" | pv -s "$(du -sb "$STACK_FOLDER_WITH_PATH" | awk '{print $1}')" | gzip > "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME".tar.gz
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 
   echo "Starting stack"
@@ -107,7 +107,7 @@ function restore {
   mv "$APPDATA_FOLDER_WITH_PATH" "${APPDATA_FOLDER_WITH_PATH}.$randstr"
   cp -a "$COMPOSE_FILE_WITH_PATH" "${COMPOSE_FILE_WITH_PATH}.$randstr"
   mkdir -p "$APPDATA_FOLDER_WITH_PATH"
-  gunzip --stdout "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar.gz | pv -s $(du -sb "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar.gz | awk '{print $1}') | tar -C "$APPDATA_FOLDER_WITH_PATH"/../ -xf -
+  gunzip --stdout "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar.gz | pv -s "$(du -sb "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar.gz | awk '{print $1}')" | tar -C "$APPDATA_FOLDER_WITH_PATH"/../ -xf -
   while IFS= read -r line; do
       image_name=$(echo "$line" | awk -F, '{print $2}')
       repo_digest=$(echo "$line" | awk -F, '{print $3}')
