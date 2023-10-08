@@ -143,10 +143,10 @@ function resume {
 # Check if the function exists
 if declare -f "$1" > /dev/null; then
   detect_docker_compose_command
+  detect_docker_compose_file
   echo "Using COMPOSE_COMMAND: $COMPOSE_COMMAND"
   echo "Using COMPOSE_FILE_WITH_PATH: $COMPOSE_FILE_WITH_PATH"
   echo "Using APPDATA_FOLDER_WITH_PATH: $APPDATA_FOLDER_WITH_PATH"
-  detect_docker_compose_file
   warn_user_about_backup_inclusion
   "$@"
 else
