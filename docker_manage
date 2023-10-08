@@ -120,6 +120,7 @@ function restore {
 
   echo "Starting stack"
   $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" up -d
+  read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 
 function resume {
@@ -137,6 +138,7 @@ function resume {
 
   echo "Starting stack"
   $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" up -d
+  read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 
 # Check if the function exists
