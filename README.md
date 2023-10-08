@@ -2,6 +2,8 @@
 A script to create backups and apply updates of Docker containers in a Compose stack.
 
 ## Description
+**!!! This branch will be used to develop a new version of the script, which will be able to be used in a multi stack environment.**
+
 This repo contains the source code for a bash script that can be used  
 to create backups of the containers and volumes in a manually set up compose stack,  
 as well as pull and apply available updates to the images.
