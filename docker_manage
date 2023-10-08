@@ -1,16 +1,15 @@
 #!/usr/bin/bash
 
 ### Variables for how stuff is named
-### Change these, if your stuff is named differently.
-# The name of the folder that your bind volumes are stored in.
-# (without any path)
 APPDATA_FOLDER_NAME="appdata"
 
 ### Variables for where stuff is saved
-### No need to change these in normal operation.
-APPDATA_FOLDER_WITH_PATH="${PWD}/${APPDATA_FOLDER_NAME}"
-COMPOSE_FILE_WITH_PATH="${PWD}/docker-compose.yml"
-VERSIONS_FILE_WITH_PATH="${PWD}/versions.txt"
+STACK_FOLDER_WITH_PATH="${PWD}"
+STACK_FOLDER_NAME=$(echo "$STACK_FOLDER_WITH_PATH" | awk -F/ '{print $NF}')
+APPDATA_FOLDER_WITH_PATH="${STACK_FOLDER_WITH_PATH}/${APPDATA_FOLDER_NAME}"
+COMPOSE_FILE_WITH_PATH="${STACK_FOLDER_WITH_PATH}/docker-compose.yml"
+VERSIONS_FILE_WITH_PATH="${STACK_FOLDER_WITH_PATH}/versions.txt"
+BACKUP_LOCATION="/opt/backups"
 
 # Functions
 function detect_docker_compose_command {
