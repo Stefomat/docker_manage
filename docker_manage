@@ -1,11 +1,16 @@
 #!/usr/bin/bash
 
-# Change variables here:
-APPDATA_FOLDER_WITH_PATH="${PWD}/appdata"
-COMPOSE_FILE_WITH_PATH="${PWD}/docker-compose.yml"
+### Variables for how stuff is named
+### Change these, if your stuff is named differently.
+# The name of the folder that your bind volumes are stored in.
+# (without any path)
+APPDATA_FOLDER_NAME="appdata"
 
-# Don't change variables below unless you want to customize the script
-VERSIONS_FILE_WITH_PATH="${APPDATA_FOLDER_WITH_PATH}/versions.txt"
+### Variables for where stuff is saved
+### No need to change these in normal operation.
+APPDATA_FOLDER_WITH_PATH="${PWD}/${APPDATA_FOLDER_NAME}"
+COMPOSE_FILE_WITH_PATH="${PWD}/docker-compose.yml"
+VERSIONS_FILE_WITH_PATH="${PWD}/versions.txt"
 
 # Functions
 function detect_docker_compose_command {
