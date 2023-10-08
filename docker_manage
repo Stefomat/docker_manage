@@ -8,6 +8,11 @@ COMPOSE_FILE_WITH_PATH="${PWD}/docker-compose.yml"
 VERSIONS_FILE_WITH_PATH="${APPDATA_FOLDER_WITH_PATH}/versions.txt"
 
 # Functions
+function warn_user_about_backup_inclusion {
+  echo -e "\e[31mAll files and subdirectories in the shown directory will be included in the backup.\e[0m"
+  read -r -p "Continue with Enter or cancel with CTRL+C..."
+}
+
 function detect_docker_compose_command {
   if docker compose > /dev/null 2>&1; then
     COMPOSE_COMMAND="docker compose"
@@ -142,6 +147,7 @@ if declare -f "$1" > /dev/null; then
   echo "Using COMPOSE_FILE_WITH_PATH: $COMPOSE_FILE_WITH_PATH"
   echo "Using APPDATA_FOLDER_WITH_PATH: $APPDATA_FOLDER_WITH_PATH"
   detect_docker_compose_file
+  warn_user_about_backup_inclusion
   "$@"
 else
   echo "The only valid arguments are backup, update, restore, and resume"
