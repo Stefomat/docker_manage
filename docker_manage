@@ -54,11 +54,15 @@ function backup {
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 
   echo "Backing up stack"
-  tar -C "$STACK_FOLDER_WITH_PATH"/.. -cf - "$STACK_FOLDER_NAME" | pv -s "$(du -sb "$STACK_FOLDER_WITH_PATH" | awk '{print $1}')" | gzip > "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME".tar.gz
+  tar -C "$STACK_FOLDER_WITH_PATH"/.. -cf - "$STACK_FOLDER_NAME" | pv -s "$(du -sb "$STACK_FOLDER_WITH_PATH" | awk '{print $1}')" > "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME".tar
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 
   echo "Starting stack"
   $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" up -d
+  read -r -p "Continue with Enter or cancel with CTRL+C..."
+
+  echo "Compressing backup"
+  gzip "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME".tar
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 
@@ -83,7 +87,7 @@ function update {
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 
   echo "Backing up stack"
-  tar -C "$STACK_FOLDER_WITH_PATH"/.. -cf - "$STACK_FOLDER_NAME" | pv -s "$(du -sb "$STACK_FOLDER_WITH_PATH" | awk '{print $1}')" | gzip > "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME".tar.gz
+  tar -C "$STACK_FOLDER_WITH_PATH"/.. -cf - "$STACK_FOLDER_NAME" | pv -s "$(du -sb "$STACK_FOLDER_WITH_PATH" | awk '{print $1}')" > "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME".tar
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 
   echo "Starting stack"
@@ -92,6 +96,10 @@ function update {
 
   echo "Pruning images"
   docker image prune -f
+  read -r -p "Continue with Enter or cancel with CTRL+C..."
+
+  echo "Compressing backup"
+  gzip "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME".tar
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 
