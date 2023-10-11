@@ -111,7 +111,16 @@ function update {
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 
   echo "Pruning images"
-  docker image prune -f
+  echo -e  "${ORANGE}Pruning can't be limited to this stack!${NC}"
+  echo -en "${ORANGE}Prune all dangling images? (Y|n)${NC} "
+  while true; do
+    read -r answer
+    case ${answer:-Y} in
+      [YyJj]) docker image prune -f; break;;
+      [Nn])   break;;
+      *)      echo "Please use \"y\" or \"n\" to answer!";;
+    esac
+  done
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 
   echo "Compressing backup"
