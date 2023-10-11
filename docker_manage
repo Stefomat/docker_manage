@@ -51,6 +51,12 @@ else
   exit 1
 fi
 
+# Look for pv
+if ! command -v pv > /dev/null 2>&1; then
+  echo -e "${RED}Cannot find pv (progress view)!${NC}"
+  exit 1
+fi
+
 # Look for Docker Compose file
 if [ ! -f "$COMPOSE_FILE_WITH_PATH" ]; then
   echo -e "${RED}Cannot find Docker Compose File!${NC}"
