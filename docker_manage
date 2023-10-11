@@ -39,6 +39,18 @@ else
   exit 1
 fi
 
+# Detect gzip command to be used
+if command -v pigz > /dev/null 2>&1; then
+  ZIP_COMMAND="pigz"
+  UNZIP_COMMAND="unpigz"
+elif command -v gzip > /dev/null 2>&1; then
+  ZIP_COMMAND="gzip"
+  UNZIP_COMMAND="gunzip"
+else
+  echo -e "${RED}Cannot find gzip/pigz!${NC}"
+  exit 1
+fi
+
 # Look for Docker Compose file
 if [ ! -f "$COMPOSE_FILE_WITH_PATH" ]; then
   echo -e "${RED}Cannot find Docker Compose File!${NC}"
@@ -74,7 +86,7 @@ function backup {
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 
   echo "Compressing backup"
-  gzip "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME".tar
+  $ZIP_COMMAND "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME".tar
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 
@@ -120,7 +132,7 @@ function update {
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 
   echo "Compressing backup"
-  gzip "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME".tar
+  $ZIP_COMMAND "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME".tar
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 
@@ -133,7 +145,7 @@ function restore {
   randstr=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c"${1:-8}";echo;)
   mv "$STACK_FOLDER_WITH_PATH" "${STACK_FOLDER_WITH_PATH}.$randstr"
   mkdir -p "$STACK_FOLDER_WITH_PATH"
-  gunzip --stdout "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME".tar.gz | pv -s "$(du -sb "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME".tar.gz | awk '{print $1}')" | tar -C "$STACK_FOLDER_WITH_PATH"/.. -xf -
+  $UNZIP_COMMAND --stdout "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME".tar.gz | pv -s "$(du -sb "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME".tar.gz | awk '{print $1}')" | tar -C "$STACK_FOLDER_WITH_PATH"/.. -xf -
   while IFS= read -r line; do
       image_name=$(echo "$line" | awk -F, '{print $2}')
       repo_digest=$(echo "$line" | awk -F, '{print $3}')
