@@ -1,5 +1,9 @@
 #!/usr/bin/bash
 
+### Colors
+RED='\033[0;31m'
+NC='\033[0m'
+
 ### Variables for how stuff is named
 APPDATA_FOLDER_NAME="appdata"
 
@@ -20,20 +24,20 @@ function detect_docker_compose_command {
       COMPOSE_COMMAND="docker-compose"
     fi
   else
-    echo -e "\e[31mCannot find Docker Compose.\e[0m"
+    echo -e "${RED}Cannot find Docker Compose!${NC}"
     exit 1
   fi
 }
 
 function detect_docker_compose_file {
   if [ ! -f "$COMPOSE_FILE_WITH_PATH" ]; then
-    echo -e "\e[31mCannot find Docker Compose File.\e[0m"
+    echo -e "${RED}Cannot find Docker Compose File!${NC}"
     exit 1
   fi
 }
 
 function warn_user_about_backup_inclusion {
-  echo -e "\e[31mAll files and subdirectories in the shown directory will be included in the backup.\e[0m"
+  echo -e "${RED}All files and subdirectories in the shown directory will be included in the backup!${NC}"
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 
