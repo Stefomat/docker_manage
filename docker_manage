@@ -6,6 +6,7 @@
 
 ### Colors
 RED='\033[0;31m'
+ORANGE='\033[0;33m'
 NC='\033[0m'
 
 ### Variables for how stuff is named
@@ -45,7 +46,7 @@ function detect_docker_compose_file {
 }
 
 function warn_user_about_backup_inclusion {
-  echo -e "${RED}All files and subdirectories in the shown directory will be included in the backup!${NC}"
+  echo -e "${ORANGE}All files and subdirectories in the shown directory will be included in the backup!${NC}"
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 
