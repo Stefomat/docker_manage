@@ -24,34 +24,30 @@ VERSIONS_FILE_WITH_PATH="${STACK_FOLDER_WITH_PATH}/versions.txt"
 BACKUP_LOCATION="/opt/backups"
 
 ####################################################################################################
-### Functions ######################################################################################
+### Preparation ####################################################################################
 ####################################################################################################
 
-# Functions
-function detect_docker_compose_command {
-  if docker compose > /dev/null 2>&1; then
-    COMPOSE_COMMAND="docker compose"
-  elif command -v docker-compose > /dev/null 2>&1; then
-    if ! [[ $(alias docker-compose 2> /dev/null) ]] ; then
-      COMPOSE_COMMAND="docker-compose"
-    fi
-  else
-    echo -e "${RED}Cannot find Docker Compose!${NC}"
-    exit 1
+# Detect Docker Compose command to be used
+if docker compose > /dev/null 2>&1; then
+  COMPOSE_COMMAND="docker compose"
+elif command -v docker-compose > /dev/null 2>&1; then
+  if ! [[ $(alias docker-compose 2> /dev/null) ]] ; then
+    COMPOSE_COMMAND="docker-compose"
   fi
-}
+else
+  echo -e "${RED}Cannot find Docker Compose!${NC}"
+  exit 1
+fi
 
-function detect_docker_compose_file {
-  if [ ! -f "$COMPOSE_FILE_WITH_PATH" ]; then
-    echo -e "${RED}Cannot find Docker Compose File!${NC}"
-    exit 1
-  fi
-}
+# Look for Docker Compose file
+if [ ! -f "$COMPOSE_FILE_WITH_PATH" ]; then
+  echo -e "${RED}Cannot find Docker Compose File!${NC}"
+  exit 1
+fi
 
-function warn_user_about_backup_inclusion {
-  echo -e "${ORANGE}All files and subdirectories in the shown directory will be included in the backup!${NC}"
-  read -r -p "Continue with Enter or cancel with CTRL+C..."
-}
+####################################################################################################
+### Functions ######################################################################################
+####################################################################################################
 
 function backup {
   echo "Detecting containers"
@@ -174,15 +170,14 @@ function resume {
 
 # Check if the function exists
 if declare -f "$1" > /dev/null; then
-  detect_docker_compose_command
-  detect_docker_compose_file
   echo "Using STACK_FOLDER_WITH_PATH:   $STACK_FOLDER_WITH_PATH"
   echo "Using APPDATA_FOLDER_WITH_PATH: $APPDATA_FOLDER_WITH_PATH"
   echo "Using COMPOSE_FILE_WITH_PATH:   $COMPOSE_FILE_WITH_PATH"
   echo "Using VERSIONS_FILE_WITH_PATH:  $VERSIONS_FILE_WITH_PATH"
   echo "Using COMPOSE_COMMAND:          $COMPOSE_COMMAND"
   echo "Using BACKUP_LOCATION:          $BACKUP_LOCATION"
-  warn_user_about_backup_inclusion
+  echo -e "${ORANGE}All files and subdirectories in the shown directory will be included in the backup!${NC}"
+  read -r -p "Continue with Enter or cancel with CTRL+C..."
   "$@"
 else
   echo "The only valid arguments are backup, update, restore, and resume"
