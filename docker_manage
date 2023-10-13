@@ -22,6 +22,9 @@ RED='\033[0;31m'
 ORANGE='\033[0;33m'
 NC='\033[0m'
 
+# Date
+DATE=$(date +%Y%m%d-%H%M%S)
+
 # Variables for where stuff is saved
 # Change these only if you know what you are doing!
 STACK_FOLDER_WITH_PATH="${PWD}"
@@ -91,7 +94,7 @@ function backup {
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 
   echo "Backing up stack"
-  tar -C "$STACK_FOLDER_WITH_PATH"/.. -cf - "$STACK_FOLDER_NAME" | pv -s "$(du -sb "$STACK_FOLDER_WITH_PATH" | awk '{print $1}')" > "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME".tar
+  tar -C "$STACK_FOLDER_WITH_PATH"/.. -cf - "$STACK_FOLDER_NAME" | pv -s "$(du -sb "$STACK_FOLDER_WITH_PATH" | awk '{print $1}')" > "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 
   echo "Starting stack"
@@ -99,7 +102,7 @@ function backup {
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 
   echo "Compressing backup"
-  $ZIP_COMMAND "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME".tar
+  $ZIP_COMMAND "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 
@@ -124,7 +127,7 @@ function update {
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 
   echo "Backing up stack"
-  tar -C "$STACK_FOLDER_WITH_PATH"/.. -cf - "$STACK_FOLDER_NAME" | pv -s "$(du -sb "$STACK_FOLDER_WITH_PATH" | awk '{print $1}')" > "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME".tar
+  tar -C "$STACK_FOLDER_WITH_PATH"/.. -cf - "$STACK_FOLDER_NAME" | pv -s "$(du -sb "$STACK_FOLDER_WITH_PATH" | awk '{print $1}')" > "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 
   echo "Starting stack"
@@ -145,7 +148,7 @@ function update {
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 
   echo "Compressing backup"
-  $ZIP_COMMAND "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME".tar
+  $ZIP_COMMAND "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 
@@ -158,7 +161,7 @@ function restore {
   randstr=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c"${1:-8}";echo;)
   mv "$STACK_FOLDER_WITH_PATH" "${STACK_FOLDER_WITH_PATH}.$randstr"
   mkdir -p "$STACK_FOLDER_WITH_PATH"
-  $UNZIP_COMMAND --stdout "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME".tar.gz | pv -s "$(du -sb "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME".tar.gz | awk '{print $1}')" | tar -C "$STACK_FOLDER_WITH_PATH"/.. -xf -
+  $UNZIP_COMMAND --stdout "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar.gz | pv -s "$(du -sb "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar.gz | awk '{print $1}')" | tar -C "$STACK_FOLDER_WITH_PATH"/.. -xf -
   while IFS= read -r line; do
       image_name=$(echo "$line" | awk -F, '{print $2}')
       repo_digest=$(echo "$line" | awk -F, '{print $3}')
