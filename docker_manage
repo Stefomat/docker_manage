@@ -107,7 +107,8 @@ function backup {
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 
   echo "Compressing backup"
-  $ZIP_COMMAND "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar
+  pv -s "$(du -sb "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar | awk '{print $1}')" "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar | $ZIP_COMMAND > "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar.gz
+  rm "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 
   echo "Deleting old backups"
@@ -157,7 +158,8 @@ function update {
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 
   echo "Compressing backup"
-  $ZIP_COMMAND "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar
+  pv -s "$(du -sb "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar | awk '{print $1}')" "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar | $ZIP_COMMAND > "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar.gz
+  rm "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 
   echo "Deleting old backups"
