@@ -13,6 +13,9 @@ APPDATA_FOLDER_NAME="appdata"
 # The location you want to store the backups (absolute, without trailing "/")
 BACKUP_LOCATION="/opt/backups"
 
+# The number of previous backups to keep
+BACKUP_KEEP=5
+
 ####################################################################################################
 ### Variables ######################################################################################
 ####################################################################################################
@@ -104,6 +107,10 @@ function backup {
   echo "Compressing backup"
   $ZIP_COMMAND "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar
   read -r -p "Continue with Enter or cancel with CTRL+C..."
+
+  echo "Deleting old backups"
+  find "$BACKUP_LOCATION"/ -maxdepth 1 -type f -name "$STACK_FOLDER_NAME-*.tar.gz" | sort -r | tail -n+$((BACKUP_KEEP+1)) | xargs -n1 rm -v
+  read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 
 function update {
@@ -149,6 +156,10 @@ function update {
 
   echo "Compressing backup"
   $ZIP_COMMAND "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar
+  read -r -p "Continue with Enter or cancel with CTRL+C..."
+
+  echo "Deleting old backups"
+  find "$BACKUP_LOCATION"/ -maxdepth 1 -type f -name "$STACK_FOLDER_NAME-*.tar.gz" | sort -r | tail -n+$((BACKUP_KEEP+1)) | xargs -n1 rm -v
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 
