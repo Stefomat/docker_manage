@@ -112,7 +112,7 @@ function backup {
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 
   echo "Deleting old backups"
-  find "$BACKUP_LOCATION"/ -maxdepth 1 -type f -name "$STACK_FOLDER_NAME-*.tar.gz" | sort -r | tail -n+$((BACKUP_KEEP+1)) | xargs -n1 rm -v
+  find "$BACKUP_LOCATION"/ -maxdepth 1 -type f -name "$STACK_FOLDER_NAME-*.tar.gz" | sort -r | tail -n+$((BACKUP_KEEP+1)) | xargs -r -n1 rm -v
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 
@@ -163,7 +163,7 @@ function update {
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 
   echo "Deleting old backups"
-  find "$BACKUP_LOCATION"/ -maxdepth 1 -type f -name "$STACK_FOLDER_NAME-*.tar.gz" | sort -r | tail -n+$((BACKUP_KEEP+1)) | xargs -n1 rm -v
+  find "$BACKUP_LOCATION"/ -maxdepth 1 -type f -name "$STACK_FOLDER_NAME-*.tar.gz" | sort -r | tail -n+$((BACKUP_KEEP+1)) | xargs -r -n1 rm -v
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 
@@ -206,7 +206,7 @@ function restore {
 # Can't be used yet with current backup naming scheme
 function resume {
   echo -e "${ORANGE}Resume not implemented at the moment!${NC}"
-  
+
   #echo "Resuming"
   #while IFS= read -r line; do
   #    image_name="$(echo "$line" | awk -F, '{print $2}')"
