@@ -48,11 +48,15 @@ function backup {
     echo "Backing up \"docker-compose.yml\""
     cp -a "$COMPOSE_FILE_WITH_PATH" "$APPDATA_FOLDER_WITH_PATH"/docker-compose.yml.bak
     echo "Backing up \"$APPDATA_FOLDER_WITH_PATH\""
-    tar -C "$APPDATA_FOLDER_WITH_PATH"/.. -cf - "$APPDATA_NAME" | pv -s "$(du -sb "$APPDATA_FOLDER_WITH_PATH" | awk '{print $1}')" | gzip > "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar.gz
+    tar -C "$APPDATA_FOLDER_WITH_PATH"/.. -cf - "$APPDATA_NAME" | pv -s "$(du -sb "$APPDATA_FOLDER_WITH_PATH" | awk '{print $1}')" > "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Starting stack"
     $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" up -d
+
+    read -r -p "Continue with Enter or cancel with CTRL+C..."
+    echo "Compressing backup"
+    gzip "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar
 }
 
 function update {
@@ -79,11 +83,15 @@ function update {
     echo "Backing up \"docker-compose.yml\""
     cp -a "$COMPOSE_FILE_WITH_PATH" "$APPDATA_FOLDER_WITH_PATH"/docker-compose.yml.bak
     echo "Backing up \"$APPDATA_FOLDER_WITH_PATH\""
-    tar -C "$APPDATA_FOLDER_WITH_PATH"/.. -cf - "$APPDATA_NAME" | pv -s "$(du -sb "$APPDATA_FOLDER_WITH_PATH" | awk '{print $1}')" | gzip > "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar.gz
+    tar -C "$APPDATA_FOLDER_WITH_PATH"/.. -cf - "$APPDATA_NAME" | pv -s "$(du -sb "$APPDATA_FOLDER_WITH_PATH" | awk '{print $1}')" > "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Starting stack"
     $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" up -d
+    
+    read -r -p "Continue with Enter or cancel with CTRL+C..."
+    echo "Compressing backup"
+    gzip "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Pruning images"
