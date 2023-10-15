@@ -53,7 +53,6 @@ function backup {
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Starting stack"
     $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" up -d
-    chown "${USER}":"${USER}" "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar.gz
 }
 
 function update {
@@ -85,7 +84,6 @@ function update {
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Starting stack"
     $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" up -d
-    chown "${USER}":"${USER}" "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar.gz
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Pruning images"
