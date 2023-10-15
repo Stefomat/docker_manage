@@ -56,7 +56,7 @@ function backup {
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Compressing backup"
-    gzip "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar
+    pigz "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar
 }
 
 function update {
@@ -91,7 +91,7 @@ function update {
     
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Compressing backup"
-    gzip "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar
+    pigz "$APPDATA_FOLDER_WITH_PATH"/../appdatabackup.tar
 
     read -r -p "Continue with Enter or cancel with CTRL+C..."
     echo "Pruning images"
