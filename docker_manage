@@ -142,6 +142,15 @@ function update {
   $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" up -d
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 
+  echo "Compressing backup"
+  pv -s "$(du -sb "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar | awk '{print $1}')" "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar | $ZIP_COMMAND > "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar.gz
+  rm "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar
+  read -r -p "Continue with Enter or cancel with CTRL+C..."
+
+  echo "Deleting old backups"
+  find "$BACKUP_LOCATION"/ -maxdepth 1 -type f -name "$STACK_FOLDER_NAME-*.tar.gz" | sort -r | tail -n+$((BACKUP_KEEP+1)) | xargs -r -n1 rm -v
+  read -r -p "Continue with Enter or cancel with CTRL+C..."
+
   echo "Pruning images"
   echo -e  "${ORANGE}Pruning can't be limited to this stack!${NC}"
   echo -en "${ORANGE}Prune all dangling images? (Y|n)${NC} "
@@ -153,15 +162,6 @@ function update {
       *)      echo "Please use \"y\" or \"n\" to answer!";;
     esac
   done
-  read -r -p "Continue with Enter or cancel with CTRL+C..."
-
-  echo "Compressing backup"
-  pv -s "$(du -sb "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar | awk '{print $1}')" "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar | $ZIP_COMMAND > "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar.gz
-  rm "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar
-  read -r -p "Continue with Enter or cancel with CTRL+C..."
-
-  echo "Deleting old backups"
-  find "$BACKUP_LOCATION"/ -maxdepth 1 -type f -name "$STACK_FOLDER_NAME-*.tar.gz" | sort -r | tail -n+$((BACKUP_KEEP+1)) | xargs -r -n1 rm -v
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 
