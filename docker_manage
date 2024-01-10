@@ -7,14 +7,14 @@ set +o histexpand
 ### Settings #######################################################################################
 ####################################################################################################
 
-# The name of the folder which your bind volumes are stored in
-APPDATA_FOLDER_NAME="appdata"
-
 # The location you want to store the backups (absolute, without trailing "/")
 BACKUP_LOCATION="/opt/backups"
 
 # The number of previous backups to keep
 BACKUP_KEEP=5
+
+# Enable optional debug information
+DEBUG=true
 
 ####################################################################################################
 ### Variables ######################################################################################
@@ -32,7 +32,6 @@ DATE=$(date +%Y%m%d-%H%M%S)
 # Change these only if you know what you are doing!
 STACK_FOLDER_WITH_PATH="${PWD}"
 STACK_FOLDER_NAME=$(echo "$STACK_FOLDER_WITH_PATH" | awk -F/ '{print $NF}')
-APPDATA_FOLDER_WITH_PATH="${STACK_FOLDER_WITH_PATH}/${APPDATA_FOLDER_NAME}"
 COMPOSE_FILE_WITH_PATH="${STACK_FOLDER_WITH_PATH}/docker-compose.yml"
 VERSIONS_FILE_WITH_PATH="${STACK_FOLDER_WITH_PATH}/versions.txt"
 
@@ -110,7 +109,7 @@ function backup {
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 
   echo "Deleting old backups"
-  find "$BACKUP_LOCATION"/ -maxdepth 1 -type f -name "$STACK_FOLDER_NAME-*.tar.gz" | sort -r | tail -n+$((BACKUP_KEEP+1)) | xargs -r -n1 rm -v
+  find "$BACKUP_LOCATION"/ -maxdepth 1 -type f -name "$STACK_FOLDER_NAME-*.tar.gz" | sort -r | tail -n +$((BACKUP_KEEP+1)) | xargs -r -n1 rm -v
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 
@@ -148,7 +147,7 @@ function update {
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 
   echo "Deleting old backups"
-  find "$BACKUP_LOCATION"/ -maxdepth 1 -type f -name "$STACK_FOLDER_NAME-*.tar.gz" | sort -r | tail -n+$((BACKUP_KEEP+1)) | xargs -r -n1 rm -v
+  find "$BACKUP_LOCATION"/ -maxdepth 1 -type f -name "$STACK_FOLDER_NAME-*.tar.gz" | sort -r | tail -n +$((BACKUP_KEEP+1)) | xargs -r -n1 rm -v
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 
   echo "Pruning images"
@@ -224,17 +223,18 @@ function resume {
 
 # Check if the function exists
 if declare -f "$1" > /dev/null; then
-  echo "Using STACK_FOLDER_WITH_PATH:   $STACK_FOLDER_WITH_PATH"
-  echo "Using APPDATA_FOLDER_WITH_PATH: $APPDATA_FOLDER_WITH_PATH"
-  echo "Using COMPOSE_FILE_WITH_PATH:   $COMPOSE_FILE_WITH_PATH"
-  echo "Using VERSIONS_FILE_WITH_PATH:  $VERSIONS_FILE_WITH_PATH"
-  echo "Using COMPOSE_COMMAND:          $COMPOSE_COMMAND"
-  echo "Using BACKUP_LOCATION:          $BACKUP_LOCATION"
-  echo "Using BACKUP_KEEP:              $BACKUP_KEEP"
-  echo "Using ZIP_COMMAND:              $ZIP_COMMAND"
-  echo "Using UNZIP_COMMAND:            $UNZIP_COMMAND"
-  echo "Using DATE:                     $DATE"
-  echo -e "${ORANGE}All files and subdirectories in the shown directory will be included in the backup!${NC}"
+  if $DEBUG; then
+    echo "Using STACK_FOLDER_WITH_PATH:   $STACK_FOLDER_WITH_PATH"
+    echo "Using COMPOSE_FILE_WITH_PATH:   $COMPOSE_FILE_WITH_PATH"
+    echo "Using VERSIONS_FILE_WITH_PATH:  $VERSIONS_FILE_WITH_PATH"
+    echo "Using COMPOSE_COMMAND:          $COMPOSE_COMMAND"
+    echo "Using BACKUP_LOCATION:          $BACKUP_LOCATION"
+    echo "Using BACKUP_KEEP:              $BACKUP_KEEP"
+    echo "Using ZIP_COMMAND:              $ZIP_COMMAND"
+    echo "Using UNZIP_COMMAND:            $UNZIP_COMMAND"
+    echo "Using DATE:                     $DATE"
+  fi
+  echo -e "${ORANGE}All files and subdirectories in the current directory will be included in the backup!${NC}"
   read -r -p "Continue with Enter or cancel with CTRL+C..."
   "$@"
 else
