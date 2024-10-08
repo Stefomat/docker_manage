@@ -83,7 +83,7 @@ function backup {
   echo "Detecting containers"
   [ -f "$VERSIONS_FILE_WITH_PATH" ] && mv "$VERSIONS_FILE_WITH_PATH" "${VERSIONS_FILE_WITH_PATH}.bak"
   for i in $($COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" config --services); do
-      container_name=$(docker run --rm -v "$(dirname "$COMPOSE_FILE_WITH_PATH")":/workdir mikefarah/yq:4 e .services."${i}".container_name "$(awk -F/ '{print $NF}' <<< "$COMPOSE_FILE_WITH_PATH")")
+      container_name=$($COMPOSE_COMMAND ps --format '{{.Name}}' "$i")
       image_name=$(docker inspect --format='{{ index .Config.Image }}' "$container_name")
       repo_digest=$(docker inspect --format='{{ index .RepoDigests 0 }}' "$(docker inspect --format='{{ .Image }}' "$container_name")")
       echo "$container_name,$image_name,$repo_digest" >> "$VERSIONS_FILE_WITH_PATH"
@@ -117,7 +117,7 @@ function update {
   echo "Detecting containers"
   [ -f "$VERSIONS_FILE_WITH_PATH" ] && mv "$VERSIONS_FILE_WITH_PATH" "${VERSIONS_FILE_WITH_PATH}.bak"
   for i in $($COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" config --services); do
-      container_name=$(docker run --rm -v "$(dirname "$COMPOSE_FILE_WITH_PATH")":/workdir mikefarah/yq:4 e .services."${i}".container_name "$(awk -F/ '{print $NF}' <<< "$COMPOSE_FILE_WITH_PATH")")
+      container_name=$($COMPOSE_COMMAND ps --format '{{.Name}}' "$i")
       image_name=$(docker inspect --format='{{ index .Config.Image }}' "$container_name")
       repo_digest=$(docker inspect --format='{{ index .RepoDigests 0 }}' "$(docker inspect --format='{{ .Image }}' "$container_name")")
       echo "$container_name,$image_name,$repo_digest" >> "$VERSIONS_FILE_WITH_PATH"
