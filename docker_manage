@@ -75,6 +75,59 @@ if ! command -v pv > /dev/null 2>&1; then
   exit 1
 fi
 
+function errorabort() {
+  case "$2" in
+    printHeader)
+      # Nothing bad happened yet, just exit
+      echo -e "${RED}Error in function $2 line $1"
+      exit 1
+    ;;
+    detectContainers)
+      # Nothing bad happened yet, just exit
+      echo -e "${RED}Error in function $2 line $1"
+      exit 1
+    ;;
+    pullImages)
+      # Nothing bad happened yet, just exit
+      echo -e "${RED}Error in function $2 line $1"
+      exit 1
+    ;;
+    stopStack)
+      # Stack is down, have to bring it back
+      echo -e "${RED}Error in function $2 line $1"
+      startStack
+      exit 1
+    ;;
+    backupStack)
+      # Stack is down, have to bring it back
+      echo -e "${RED}Error in function $2 line $1"
+      startStack
+      exit 1
+    ;;
+    startStack)
+      # Stack is down and can't get up, hopefully monitoring catches that ;)
+      echo -e "${RED}Error in function $2 line $1"
+      exit 1
+    ;;
+    compressBackup)
+      # Nothing bad happened yet, just exit
+      echo -e "${RED}Error in function $2 line $1"
+      exit 1
+    ;;
+    rotateBackups)
+      # Nothing bad happened yet, just exit
+      echo -e "${RED}Error in function $2 line $1"
+      exit 1
+    ;;
+    pruneImages)
+      # Nothing bad happened yet, just exit
+      echo -e "${RED}Error in function $2 line $1"
+      exit 1
+    ;;
+    *) ;;
+  esac
+}
+
 ####################################################################################################
 ### Functions ######################################################################################
 ####################################################################################################
