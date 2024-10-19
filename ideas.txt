@@ -1,0 +1,58 @@
+#!/bin/bash
+
+# Can't be used yet with current backup naming scheme
+function restore {
+  echo -e "${ORANGE}Restore not implemented at the moment!${NC}"
+  echo -e "${ORANGE}To restore, do the following:${NC}"
+  echo -e "${ORANGE}1. Stop your stack${NC}"
+  echo -e "${ORANGE}2. Move your stack directory${NC}"
+  echo -e "${ORANGE}3. Extract the backup${NC}"
+  echo -e "${ORANGE}4. (Optionally) Replace all the image tags with repo_digest from versions.txt${NC}"
+  echo -e "${ORANGE}5. Pull images${NC}"
+  echo -e "${ORANGE}6. Start your stack${NC}"
+
+  #echo "Stopping stack"
+  #$COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" down
+  #read -r -p "Continue with Enter or cancel with CTRL+C..."
+
+  #echo "Restoring backup"
+  #randstr=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c"${1:-8}";echo;)
+  #mv "$STACK_FOLDER_WITH_PATH" "${STACK_FOLDER_WITH_PATH}.$randstr"
+  #mkdir -p "$STACK_FOLDER_WITH_PATH"
+  #$UNZIP_COMMAND --stdout "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar.gz | pv -s "$(du -sb "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar.gz | awk '{print $1}')" | tar -C "$STACK_FOLDER_WITH_PATH"/.. -xf -
+  #while IFS= read -r line; do
+  #    image_name=$(echo "$line" | awk -F, '{print $2}')
+  #    repo_digest=$(echo "$line" | awk -F, '{print $3}')
+  #    sed -i "s#image: ${image_name}#image: ${repo_digest}#g" "$COMPOSE_FILE_WITH_PATH"
+  #done < <(cat "$VERSIONS_FILE_WITH_PATH")
+  #read -r -p "Continue with Enter or cancel with CTRL+C..."
+
+  #echo "Pulling images"
+  #$COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" pull
+  #read -r -p "Continue with Enter or cancel with CTRL+C..."
+
+  #echo "Starting stack"
+  #$COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" up -d
+  #read -r -p "Continue with Enter or cancel with CTRL+C..."
+}
+
+# Can't be used yet with current backup naming scheme
+function resume {
+  echo -e "${ORANGE}Resume not implemented at the moment!${NC}"
+
+  #echo "Resuming"
+  #while IFS= read -r line; do
+  #    image_name="$(echo "$line" | awk -F, '{print $2}')"
+  #    repo_digest="$(echo "$line" | awk -F, '{print $3}')"
+  #    sed -i "s#image: ${repo_digest}#image: ${image_name}#g" "$COMPOSE_FILE_WITH_PATH"
+  #done < <(cat "$VERSIONS_FILE_WITH_PATH")
+  #read -r -p "Continue with Enter or cancel with CTRL+C..."
+
+  #echo "Pulling images"
+  #$COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" pull
+  #read -r -p "Continue with Enter or cancel with CTRL+C..."
+
+  #echo "Starting stack"
+  #$COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" up -d
+  #read -r -p "Continue with Enter or cancel with CTRL+C..."
+}
