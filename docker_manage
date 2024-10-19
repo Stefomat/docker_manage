@@ -1,5 +1,7 @@
 #!/usr/bin/bash
 
+# shellcheck disable=SC2128
+
 # Needed for echo to correctly work with color codes
 set +o histexpand
 
