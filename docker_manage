@@ -212,7 +212,12 @@ function update {
 case "$1" in
   backup) backup;;
   update) update;;
-  *) echo "$(basename "$0") backup|update";;
+  *)
+    echo "Usage:"
+    echo "$(basename "$0") backup|update [PATH TO COMPOSE YML]"
+    echo ""
+    echo "If PATH TO COMPOSE YML is given, runs in headless mode without user interaction."
+    echo "Argument update won't prune images in headless mode.";;
 esac
 
 exit 0
