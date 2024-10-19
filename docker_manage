@@ -27,7 +27,7 @@ DATE=$(date +%Y%m%d-%H%M%S)
 
 # Variables for where stuff is saved
 # Change these only if you know what you are doing!
-COMPOSE_FILE_WITH_PATH="${PWD}/docker-compose.yml"
+COMPOSE_FILE_WITH_PATH=${2:-${PWD}/docker-compose.yml}
 STACK_FOLDER_WITH_PATH=$(dirname "$COMPOSE_FILE_WITH_PATH")
 STACK_FOLDER_NAME=$(basename "$STACK_FOLDER_WITH_PATH")
 VERSIONS_FILE_WITH_PATH="${STACK_FOLDER_WITH_PATH}/versions.txt"
