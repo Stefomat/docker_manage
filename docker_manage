@@ -184,6 +184,7 @@ function pruneImages() {
 }
 
 function backup {
+  TOTAL_TIMING_START=$(date +%s)
   printHeader
   detectContainers
   stopStack
@@ -191,9 +192,12 @@ function backup {
   startStack
   compressBackup
   rotateBackups
+  TOTAL_TIMING_STOP=$(date +%s)
+  echo "## >> Total Time taken: $((TOTAL_TIMING_STOP-TOTAL_TIMING_START))s"
 }
 
 function update {
+  TOTAL_TIMING_START=$(date +%s)
   printHeader
   detectContainers
   pullImages
@@ -203,6 +207,8 @@ function update {
   compressBackup
   rotateBackups
   pruneImages
+  TOTAL_TIMING_STOP=$(date +%s)
+  echo "## >> Total Time taken: $((TOTAL_TIMING_STOP-TOTAL_TIMING_START))s"
 }
 
 ####################################################################################################
