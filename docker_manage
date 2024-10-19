@@ -117,6 +117,7 @@ function pullImages() {
 function stopStack() {
   echo "Stopping stack"
   TIMING_START=$(date +%s)
+  DOWNTIME_START=$TIMING_START
   $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" down
   TIMING_STOP=$(date +%s)
   echo "Time taken: $((TIMING_STOP-TIMING_START))s"
@@ -137,7 +138,9 @@ function startStack() {
   TIMING_START=$(date +%s)
   $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" up -d
   TIMING_STOP=$(date +%s)
+  DOWNTIME_STOP=$TIMING_STOP
   echo "Time taken: $((TIMING_STOP-TIMING_START))s"
+  echo "Service Downtime: $((DOWNTIME_STOP-DOWNTIME_START))s"
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 
