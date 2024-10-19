@@ -80,20 +80,20 @@ fi
 ####################################################################################################
 
 function printHeader() {
-  echo "Using STACK_FOLDER_WITH_PATH:   $STACK_FOLDER_WITH_PATH"
-  echo "Using COMPOSE_FILE_WITH_PATH:   $COMPOSE_FILE_WITH_PATH"
-  echo "Using VERSIONS_FILE_WITH_PATH:  $VERSIONS_FILE_WITH_PATH"
-  echo "Using COMPOSE_COMMAND:          $COMPOSE_COMMAND"
-  echo "Using BACKUP_LOCATION:          $BACKUP_LOCATION"
-  echo "Using BACKUP_KEEP:              $BACKUP_KEEP"
-  echo "Using ZIP_COMMAND:              $ZIP_COMMAND"
-  echo "Using UNZIP_COMMAND:            $UNZIP_COMMAND"
-  echo "Using DATE:                     $DATE"
-  echo -e "${ORANGE}All files and subdirectories in the current directory will be included in the backup!${NC}"
+  echo "#### Using STACK_FOLDER_WITH_PATH:   $STACK_FOLDER_WITH_PATH"
+  echo "#### Using COMPOSE_FILE_WITH_PATH:   $COMPOSE_FILE_WITH_PATH"
+  echo "#### Using VERSIONS_FILE_WITH_PATH:  $VERSIONS_FILE_WITH_PATH"
+  echo "#### Using COMPOSE_COMMAND:          $COMPOSE_COMMAND"
+  echo "#### Using BACKUP_LOCATION:          $BACKUP_LOCATION"
+  echo "#### Using BACKUP_KEEP:              $BACKUP_KEEP"
+  echo "#### Using ZIP_COMMAND:              $ZIP_COMMAND"
+  echo "#### Using UNZIP_COMMAND:            $UNZIP_COMMAND"
+  echo "#### Using DATE:                     $DATE"
+  echo -e "#### ${ORANGE}All files and subdirectories in the current directory will be included in the backup!${NC}"
   test -n "$HEADLESS" || read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 function detectContainers() {
-  echo "Detecting containers"
+  echo "## Detecting containers"
   TIMING_START=$(date +%s)
   [ -f "$VERSIONS_FILE_WITH_PATH" ] && mv "$VERSIONS_FILE_WITH_PATH" "${VERSIONS_FILE_WITH_PATH}.bak"
   for i in $($COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" config --services); do
@@ -104,70 +104,70 @@ function detectContainers() {
   done
   [ -f "${VERSIONS_FILE_WITH_PATH}.bak" ] && rm "${VERSIONS_FILE_WITH_PATH}.bak"
   TIMING_STOP=$(date +%s)
-  echo "Time taken: $((TIMING_STOP-TIMING_START))s"
+  echo "## >> Time taken: $((TIMING_STOP-TIMING_START))s"
   test -n "$HEADLESS" || read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 
 function pullImages() {
-  echo "Pulling images"
+  echo "## Pulling images"
   TIMING_START=$(date +%s)
   $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" pull
   TIMING_STOP=$(date +%s)
-  echo "Time taken: $((TIMING_STOP-TIMING_START))s"
+  echo "## >> Time taken: $((TIMING_STOP-TIMING_START))s"
   test -n "$HEADLESS" || read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 
 function stopStack() {
-  echo "Stopping stack"
+  echo "## Stopping stack"
   TIMING_START=$(date +%s)
   DOWNTIME_START=$TIMING_START
   $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" down
   TIMING_STOP=$(date +%s)
-  echo "Time taken: $((TIMING_STOP-TIMING_START))s"
+  echo "## >> Time taken: $((TIMING_STOP-TIMING_START))s"
   test -n "$HEADLESS" || read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 
 function backupStack() {
-  echo "Backing up stack"
+  echo "## Backing up stack"
   TIMING_START=$(date +%s)
   tar -C "$STACK_FOLDER_WITH_PATH"/.. -cf - "$STACK_FOLDER_NAME" | pv -s "$(du -sb "$STACK_FOLDER_WITH_PATH" | awk '{print $1}')" > "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar
   TIMING_STOP=$(date +%s)
-  echo "Time taken: $((TIMING_STOP-TIMING_START))s"
+  echo "## >> Time taken: $((TIMING_STOP-TIMING_START))s"
   test -n "$HEADLESS" || read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 
 function startStack() {
-  echo "Starting stack"
+  echo "## Starting stack"
   TIMING_START=$(date +%s)
   $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" up -d
   TIMING_STOP=$(date +%s)
   DOWNTIME_STOP=$TIMING_STOP
-  echo "Time taken: $((TIMING_STOP-TIMING_START))s"
-  echo "Service Downtime: $((DOWNTIME_STOP-DOWNTIME_START))s"
+  echo "## >> Time taken: $((TIMING_STOP-TIMING_START))s"
+  echo "## >> Service Downtime: $((DOWNTIME_STOP-DOWNTIME_START))s"
   test -n "$HEADLESS" || read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 
 function compressBackup() {
-  echo "Compressing backup"
+  echo "## Compressing backup"
   TIMING_START=$(date +%s)
   pv -s "$(du -sb "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar | awk '{print $1}')" "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar | $ZIP_COMMAND > "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar.gz
   rm "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar
   TIMING_STOP=$(date +%s)
-  echo "Time taken: $((TIMING_STOP-TIMING_START))s"
+  echo "## >> Time taken: $((TIMING_STOP-TIMING_START))s"
   test -n "$HEADLESS" || read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 
 function rotateBackups() {
-  echo "Deleting old backups"
+  echo "## Deleting old backups"
   TIMING_START=$(date +%s)
   find "$BACKUP_LOCATION"/ -maxdepth 1 -type f -name "$STACK_FOLDER_NAME-*.tar.gz" | sort -r | tail -n +$((BACKUP_KEEP+1)) | xargs -r -n1 rm -v
   TIMING_STOP=$(date +%s)
-  echo "Time taken: $((TIMING_STOP-TIMING_START))s"
+  echo "## >> Time taken: $((TIMING_STOP-TIMING_START))s"
   test -n "$HEADLESS" || read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 
 function pruneImages() {
-  echo "Pruning images"
+  echo "## Pruning images"
   echo -e  "${ORANGE}Pruning can't be limited to this stack!${NC}"
   echo -en "${ORANGE}Prune all dangling images? (Y|n)${NC} "
   while true; do
@@ -179,7 +179,7 @@ function pruneImages() {
     esac
   done
   TIMING_STOP=$(date +%s)
-  echo "Time taken: $((TIMING_STOP-TIMING_START))s"
+  echo "## >> Time taken: $((TIMING_STOP-TIMING_START))s"
   test -n "$HEADLESS" || read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 
