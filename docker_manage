@@ -185,3 +185,5 @@ case "$1" in
   update) update;;
   *) echo "$(basename "$0") backup|update";;
 esac
+
+exit 0
