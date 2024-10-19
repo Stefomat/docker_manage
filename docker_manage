@@ -150,9 +150,9 @@ function detectContainers() {
   TIMING_START=$(date +%s)
   [ -f "$VERSIONS_FILE_WITH_PATH" ] && mv "$VERSIONS_FILE_WITH_PATH" "${VERSIONS_FILE_WITH_PATH}.bak"
   for i in $($COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" config --services); do
-      container_name=$($COMPOSE_COMMAND ps --format '{{.Name}}' "$i")
-      image_name=$(docker inspect --format='{{ index .Config.Image }}' "$container_name")
-      repo_digest=$(docker inspect --format='{{ index .RepoDigests 0 }}' "$(docker inspect --format='{{ .Image }}' "$container_name")")
+      container_name=$($COMPOSE_COMMAND ps --format '{{.Name}}' "$i" || errorabort "$LINENO" "$FUNCNAME")
+      image_name=$(docker inspect --format='{{ index .Config.Image }}' "$container_name" || errorabort "$LINENO" "$FUNCNAME")
+      repo_digest=$(docker inspect --format='{{ index .RepoDigests 0 }}' "$(docker inspect --format='{{ .Image }}' "$container_name")" || errorabort "$LINENO" "$FUNCNAME")
       echo "$container_name,$image_name,$repo_digest" >> "$VERSIONS_FILE_WITH_PATH"
   done
   [ -f "${VERSIONS_FILE_WITH_PATH}.bak" ] && rm "${VERSIONS_FILE_WITH_PATH}.bak"
@@ -164,7 +164,7 @@ function detectContainers() {
 function pullImages() {
   echo "## Pulling images"
   TIMING_START=$(date +%s)
-  $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" pull
+  $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" pull || errorabort "$LINENO" "$FUNCNAME"
   TIMING_STOP=$(date +%s)
   echo "## >> Time taken: $((TIMING_STOP-TIMING_START))s"
   test -n "$HEADLESS" || read -r -p "Continue with Enter or cancel with CTRL+C..."
@@ -174,7 +174,7 @@ function stopStack() {
   echo "## Stopping stack"
   TIMING_START=$(date +%s)
   DOWNTIME_START=$TIMING_START
-  $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" down
+  $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" down || errorabort "$LINENO" "$FUNCNAME"
   TIMING_STOP=$(date +%s)
   echo "## >> Time taken: $((TIMING_STOP-TIMING_START))s"
   test -n "$HEADLESS" || read -r -p "Continue with Enter or cancel with CTRL+C..."
@@ -183,7 +183,7 @@ function stopStack() {
 function backupStack() {
   echo "## Backing up stack"
   TIMING_START=$(date +%s)
-  tar -C "$STACK_FOLDER_WITH_PATH"/.. -cf - "$STACK_FOLDER_NAME" | pv -s "$(du -sb "$STACK_FOLDER_WITH_PATH" | awk '{print $1}')" > "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar
+  tar -C "$STACK_FOLDER_WITH_PATH"/.. -cf - "$STACK_FOLDER_NAME" | pv -s "$(du -sb "$STACK_FOLDER_WITH_PATH" | awk '{print $1}')" > "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar || errorabort "$LINENO" "$FUNCNAME"
   TIMING_STOP=$(date +%s)
   echo "## >> Time taken: $((TIMING_STOP-TIMING_START))s"
   test -n "$HEADLESS" || read -r -p "Continue with Enter or cancel with CTRL+C..."
@@ -192,7 +192,7 @@ function backupStack() {
 function startStack() {
   echo "## Starting stack"
   TIMING_START=$(date +%s)
-  $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" up -d
+  $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" up -d || errorabort "$LINENO" "$FUNCNAME"
   TIMING_STOP=$(date +%s)
   DOWNTIME_STOP=$TIMING_STOP
   echo "## >> Time taken: $((TIMING_STOP-TIMING_START))s"
@@ -203,8 +203,8 @@ function startStack() {
 function compressBackup() {
   echo "## Compressing backup"
   TIMING_START=$(date +%s)
-  pv -s "$(du -sb "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar | awk '{print $1}')" "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar | $ZIP_COMMAND > "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar.gz
-  rm "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar
+  pv -s "$(du -sb "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar | awk '{print $1}')" "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar | $ZIP_COMMAND > "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar.gz || errorabort "$LINENO" "$FUNCNAME"
+  rm "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar || errorabort "$LINENO" "$FUNCNAME"
   TIMING_STOP=$(date +%s)
   echo "## >> Time taken: $((TIMING_STOP-TIMING_START))s"
   test -n "$HEADLESS" || read -r -p "Continue with Enter or cancel with CTRL+C..."
@@ -213,7 +213,7 @@ function compressBackup() {
 function rotateBackups() {
   echo "## Deleting old backups"
   TIMING_START=$(date +%s)
-  find "$BACKUP_LOCATION"/ -maxdepth 1 -type f -name "$STACK_FOLDER_NAME-*.tar.gz" | sort -r | tail -n +$((BACKUP_KEEP+1)) | xargs -r -n1 rm -v
+  find "$BACKUP_LOCATION"/ -maxdepth 1 -type f -name "$STACK_FOLDER_NAME-*.tar.gz" | sort -r | tail -n +$((BACKUP_KEEP+1)) | xargs -r -n1 rm -v || errorabort "$LINENO" "$FUNCNAME"
   TIMING_STOP=$(date +%s)
   echo "## >> Time taken: $((TIMING_STOP-TIMING_START))s"
   test -n "$HEADLESS" || read -r -p "Continue with Enter or cancel with CTRL+C..."
@@ -226,7 +226,7 @@ function pruneImages() {
   while true; do
     read -r answer
     case ${answer:-Y} in
-      [YyJj]) TIMING_START=$(date +%s); docker image prune -f; break;;
+      [YyJj]) TIMING_START=$(date +%s); docker image prune -f || errorabort "$LINENO" "$FUNCNAME"; break;;
       [Nn])   break;;
       *)      echo "Please use \"y\" or \"n\" to answer!";;
     esac
