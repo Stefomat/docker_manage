@@ -206,7 +206,7 @@ function update {
   startStack
   compressBackup
   rotateBackups
-  pruneImages
+  test -n "$HEADLESS" || pruneImages
   TOTAL_TIMING_STOP=$(date +%s)
   echo "## >> Total Time taken: $((TOTAL_TIMING_STOP-TOTAL_TIMING_START))s"
 }
