@@ -13,9 +13,6 @@ BACKUP_LOCATION="/opt/backups"
 # The number of previous backups to keep
 BACKUP_KEEP=5
 
-# Enable optional debug information
-DEBUG=true
-
 ####################################################################################################
 ### Variables ######################################################################################
 ####################################################################################################
@@ -223,17 +220,15 @@ function resume {
 
 # Check if the function exists
 if declare -f "$1" > /dev/null; then
-  if $DEBUG; then
-    echo "Using STACK_FOLDER_WITH_PATH:   $STACK_FOLDER_WITH_PATH"
-    echo "Using COMPOSE_FILE_WITH_PATH:   $COMPOSE_FILE_WITH_PATH"
-    echo "Using VERSIONS_FILE_WITH_PATH:  $VERSIONS_FILE_WITH_PATH"
-    echo "Using COMPOSE_COMMAND:          $COMPOSE_COMMAND"
-    echo "Using BACKUP_LOCATION:          $BACKUP_LOCATION"
-    echo "Using BACKUP_KEEP:              $BACKUP_KEEP"
-    echo "Using ZIP_COMMAND:              $ZIP_COMMAND"
-    echo "Using UNZIP_COMMAND:            $UNZIP_COMMAND"
-    echo "Using DATE:                     $DATE"
-  fi
+  echo "Using STACK_FOLDER_WITH_PATH:   $STACK_FOLDER_WITH_PATH"
+  echo "Using COMPOSE_FILE_WITH_PATH:   $COMPOSE_FILE_WITH_PATH"
+  echo "Using VERSIONS_FILE_WITH_PATH:  $VERSIONS_FILE_WITH_PATH"
+  echo "Using COMPOSE_COMMAND:          $COMPOSE_COMMAND"
+  echo "Using BACKUP_LOCATION:          $BACKUP_LOCATION"
+  echo "Using BACKUP_KEEP:              $BACKUP_KEEP"
+  echo "Using ZIP_COMMAND:              $ZIP_COMMAND"
+  echo "Using UNZIP_COMMAND:            $UNZIP_COMMAND"
+  echo "Using DATE:                     $DATE"
   echo -e "${ORANGE}All files and subdirectories in the current directory will be included in the backup!${NC}"
   read -r -p "Continue with Enter or cancel with CTRL+C..."
   "$@"
