@@ -76,7 +76,7 @@ fi
 ### Functions ######################################################################################
 ####################################################################################################
 
-function backup {
+function detectContainers() {
   echo "Detecting containers"
   [ -f "$VERSIONS_FILE_WITH_PATH" ] && mv "$VERSIONS_FILE_WITH_PATH" "${VERSIONS_FILE_WITH_PATH}.bak"
   for i in $($COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" config --services); do
@@ -87,66 +87,46 @@ function backup {
   done
   [ -f "${VERSIONS_FILE_WITH_PATH}.bak" ] && rm "${VERSIONS_FILE_WITH_PATH}.bak"
   read -r -p "Continue with Enter or cancel with CTRL+C..."
+}
 
+function pullImages() {
+  echo "Pulling images"
+  $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" pull
+  read -r -p "Continue with Enter or cancel with CTRL+C..."
+}
+
+function stopStack() {
   echo "Stopping stack"
   $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" down
   read -r -p "Continue with Enter or cancel with CTRL+C..."
+}
 
+function backupStack() {
   echo "Backing up stack"
   tar -C "$STACK_FOLDER_WITH_PATH"/.. -cf - "$STACK_FOLDER_NAME" | pv -s "$(du -sb "$STACK_FOLDER_WITH_PATH" | awk '{print $1}')" > "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar
   read -r -p "Continue with Enter or cancel with CTRL+C..."
+}
 
+function startStack() {
   echo "Starting stack"
   $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" up -d
   read -r -p "Continue with Enter or cancel with CTRL+C..."
+}
 
+function compressBackup() {
   echo "Compressing backup"
   pv -s "$(du -sb "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar | awk '{print $1}')" "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar | $ZIP_COMMAND > "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar.gz
   rm "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar
   read -r -p "Continue with Enter or cancel with CTRL+C..."
+}
 
+function rotateBackups() {
   echo "Deleting old backups"
   find "$BACKUP_LOCATION"/ -maxdepth 1 -type f -name "$STACK_FOLDER_NAME-*.tar.gz" | sort -r | tail -n +$((BACKUP_KEEP+1)) | xargs -r -n1 rm -v
   read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 
-function update {
-  echo "Detecting containers"
-  [ -f "$VERSIONS_FILE_WITH_PATH" ] && mv "$VERSIONS_FILE_WITH_PATH" "${VERSIONS_FILE_WITH_PATH}.bak"
-  for i in $($COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" config --services); do
-      container_name=$($COMPOSE_COMMAND ps --format '{{.Name}}' "$i")
-      image_name=$(docker inspect --format='{{ index .Config.Image }}' "$container_name")
-      repo_digest=$(docker inspect --format='{{ index .RepoDigests 0 }}' "$(docker inspect --format='{{ .Image }}' "$container_name")")
-      echo "$container_name,$image_name,$repo_digest" >> "$VERSIONS_FILE_WITH_PATH"
-  done
-  [ -f "${VERSIONS_FILE_WITH_PATH}.bak" ] && rm "${VERSIONS_FILE_WITH_PATH}.bak"
-  read -r -p "Continue with Enter or cancel with CTRL+C..."
-
-  echo "Pulling images"
-  $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" pull
-  read -r -p "Continue with Enter or cancel with CTRL+C..."
-
-  echo "Stopping stack"
-  $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" down
-  read -r -p "Continue with Enter or cancel with CTRL+C..."
-
-  echo "Backing up stack"
-  tar -C "$STACK_FOLDER_WITH_PATH"/.. -cf - "$STACK_FOLDER_NAME" | pv -s "$(du -sb "$STACK_FOLDER_WITH_PATH" | awk '{print $1}')" > "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar
-  read -r -p "Continue with Enter or cancel with CTRL+C..."
-
-  echo "Starting stack"
-  $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" up -d
-  read -r -p "Continue with Enter or cancel with CTRL+C..."
-
-  echo "Compressing backup"
-  pv -s "$(du -sb "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar | awk '{print $1}')" "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar | $ZIP_COMMAND > "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar.gz
-  rm "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar
-  read -r -p "Continue with Enter or cancel with CTRL+C..."
-
-  echo "Deleting old backups"
-  find "$BACKUP_LOCATION"/ -maxdepth 1 -type f -name "$STACK_FOLDER_NAME-*.tar.gz" | sort -r | tail -n +$((BACKUP_KEEP+1)) | xargs -r -n1 rm -v
-  read -r -p "Continue with Enter or cancel with CTRL+C..."
-
+function pruneImages() {
   echo "Pruning images"
   echo -e  "${ORANGE}Pruning can't be limited to this stack!${NC}"
   echo -en "${ORANGE}Prune all dangling images? (Y|n)${NC} "
@@ -159,6 +139,26 @@ function update {
     esac
   done
   read -r -p "Continue with Enter or cancel with CTRL+C..."
+}
+
+function backup {
+  detectContainers
+  stopStack
+  backupStack
+  startStack
+  compressBackup
+  rotateBackups
+}
+
+function update {
+  detectContainers
+  pullImages
+  stopStack
+  backupStack
+  startStack
+  compressBackup
+  rotateBackups
+  pruneImages
 }
 
 # Can't be used yet with current backup naming scheme
