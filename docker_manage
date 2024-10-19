@@ -36,6 +36,9 @@ VERSIONS_FILE_WITH_PATH="${STACK_FOLDER_WITH_PATH}/versions.txt"
 ### Preparation ####################################################################################
 ####################################################################################################
 
+# Running headless?
+HEADLESS=${2:+TRUE}
+
 # Look for Docker Compose file
 if [ ! -f "$COMPOSE_FILE_WITH_PATH" ]; then
   echo -e "${RED}Cannot find Docker Compose File!${NC}"
@@ -87,7 +90,7 @@ function printHeader() {
   echo "Using UNZIP_COMMAND:            $UNZIP_COMMAND"
   echo "Using DATE:                     $DATE"
   echo -e "${ORANGE}All files and subdirectories in the current directory will be included in the backup!${NC}"
-  read -r -p "Continue with Enter or cancel with CTRL+C..."
+  test -n "$HEADLESS" || read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 function detectContainers() {
   echo "Detecting containers"
@@ -102,7 +105,7 @@ function detectContainers() {
   [ -f "${VERSIONS_FILE_WITH_PATH}.bak" ] && rm "${VERSIONS_FILE_WITH_PATH}.bak"
   TIMING_STOP=$(date +%s)
   echo "Time taken: $((TIMING_STOP-TIMING_START))s"
-  read -r -p "Continue with Enter or cancel with CTRL+C..."
+  test -n "$HEADLESS" || read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 
 function pullImages() {
@@ -111,7 +114,7 @@ function pullImages() {
   $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" pull
   TIMING_STOP=$(date +%s)
   echo "Time taken: $((TIMING_STOP-TIMING_START))s"
-  read -r -p "Continue with Enter or cancel with CTRL+C..."
+  test -n "$HEADLESS" || read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 
 function stopStack() {
@@ -121,7 +124,7 @@ function stopStack() {
   $COMPOSE_COMMAND -f "$COMPOSE_FILE_WITH_PATH" down
   TIMING_STOP=$(date +%s)
   echo "Time taken: $((TIMING_STOP-TIMING_START))s"
-  read -r -p "Continue with Enter or cancel with CTRL+C..."
+  test -n "$HEADLESS" || read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 
 function backupStack() {
@@ -130,7 +133,7 @@ function backupStack() {
   tar -C "$STACK_FOLDER_WITH_PATH"/.. -cf - "$STACK_FOLDER_NAME" | pv -s "$(du -sb "$STACK_FOLDER_WITH_PATH" | awk '{print $1}')" > "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar
   TIMING_STOP=$(date +%s)
   echo "Time taken: $((TIMING_STOP-TIMING_START))s"
-  read -r -p "Continue with Enter or cancel with CTRL+C..."
+  test -n "$HEADLESS" || read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 
 function startStack() {
@@ -141,7 +144,7 @@ function startStack() {
   DOWNTIME_STOP=$TIMING_STOP
   echo "Time taken: $((TIMING_STOP-TIMING_START))s"
   echo "Service Downtime: $((DOWNTIME_STOP-DOWNTIME_START))s"
-  read -r -p "Continue with Enter or cancel with CTRL+C..."
+  test -n "$HEADLESS" || read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 
 function compressBackup() {
@@ -151,7 +154,7 @@ function compressBackup() {
   rm "$BACKUP_LOCATION"/"$STACK_FOLDER_NAME"-"$DATE".tar
   TIMING_STOP=$(date +%s)
   echo "Time taken: $((TIMING_STOP-TIMING_START))s"
-  read -r -p "Continue with Enter or cancel with CTRL+C..."
+  test -n "$HEADLESS" || read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 
 function rotateBackups() {
@@ -160,7 +163,7 @@ function rotateBackups() {
   find "$BACKUP_LOCATION"/ -maxdepth 1 -type f -name "$STACK_FOLDER_NAME-*.tar.gz" | sort -r | tail -n +$((BACKUP_KEEP+1)) | xargs -r -n1 rm -v
   TIMING_STOP=$(date +%s)
   echo "Time taken: $((TIMING_STOP-TIMING_START))s"
-  read -r -p "Continue with Enter or cancel with CTRL+C..."
+  test -n "$HEADLESS" || read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 
 function pruneImages() {
@@ -177,7 +180,7 @@ function pruneImages() {
   done
   TIMING_STOP=$(date +%s)
   echo "Time taken: $((TIMING_STOP-TIMING_START))s"
-  read -r -p "Continue with Enter or cancel with CTRL+C..."
+  test -n "$HEADLESS" || read -r -p "Continue with Enter or cancel with CTRL+C..."
 }
 
 function backup {
